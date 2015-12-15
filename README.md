@@ -49,6 +49,59 @@ Since s query and e query both have support for more specific literals
 
 
 ## block (BlockStatement)
+
+
+### Coding style
+
+	# adding missing curly braces
+	grasp -s "if.then:not(block)" -R '{{{}}}' -i 
+
+### Empty blocks
+
+	grasp -s 'block:not(block! > *)'
+
+Empty catch blocks
+
+	# TODO: using catch body ?
+	grasp -s 'catch>block:not(block! > *)' -r 
+
+### Empty functions
+
+	# empty function (TODO: s query for other variants)	
+	grasp -e 'function $name(__){}' -r misc/grasp/test/
+
+### One Liner blocks
+	
+	# one line if else (useless) why not using && || ?
+	grasp -e 'if(__){ __ }else{ __ }'
+
+
+	# specific one liner blocks (coding horror)
+	grasp -e 'if(__){ return _bool }else{ return _bool }'
+
+### Block containing something
+
+	block.body:matches
+
+	# ifs with return in the if block
+	grasp -s 'if:matches(if! block.body:matches(return))' 
+	
+	# ifs with return in the if block followed by return 
+	grasp -s 'if:matches(if! block.body:matches(return))!~return' 
+
+	# ifs with return in the if block followed immediately by return 
+	grasp -s '*!>if:matches(if! block.body:matches(return))+return' -r
+
+	# TODO: ifs without else, with return in the if block followed immediately by return 
+
+### Block not containing something
+
+	# useless dojo hitch, hitch(this,f) where f is not using this at all
+	grasp -s "call[callee=member[prop=#hitch]].arguments:nth(1):matches(func-exp).body:not(block! this)" 
+
+	# TODO: useless ES bind 
+	
+
 ## exp-statement (ExpressionStatement)
 ## if (IfStatement)
 ## label (LabeledStatement)
@@ -69,6 +122,17 @@ Since s query and e query both have support for more specific literals
 
 ## var-dec (VariableDeclarator)
 
+### Variables usage
+
+Count of (evil) variables per file
+
+	grasp -c "var-dec" -r
+
+How many variables are declared on the same line ?
+	
+	# var a,b,c,d vs var a, var b, var c style (TODO: improve, multi lines)
+	grasp "var-decs var-dec" -r | cut -d":" -f1,2 | sort | uniq -c
+
 ### Names of variables
 can be used to enforce naming conventions, check against 'data dictionary' or simply spell check.
 
@@ -87,9 +151,32 @@ can be used to enforce naming conventions, check against 'data dictionary' or si
 	  15 s
 	  15 w
 
-Finding variales with given name
+Finding variables with given name
 
 	grasp -s -o "var-dec[id=#_this]" -r
+
+### Declaring empty object, array
+
+	# echo "var x={},y={};" | 
+	grasp -s 'var-dec[init=obj:not(obj! > prop[key])]' 
+
+	# TODO: array
+
+### Function expressions assigned to variable with given name
+
+finding (one of the styles) validation functions
+
+	# var vali*=function(){}
+	grasp -s 'var-dec[id=#/^vali/][init=func-exp]' -r misc/grasp/test/
+
+
+	grasp-find-function(){
+		name="$1"
+		shift
+		grasp -s \
+			'func-dec[id=#/^'$name'/],var-dec[id=#/^'"$name"'/][init=func-exp],prop[key=#/^'"$name"'/][val=func-exp]' \
+			-r "$@"
+	}
 
 
 
