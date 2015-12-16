@@ -1,4 +1,4 @@
-# grasp-samples
+# graspmples
 
 This is our collection of various grasp samples.
 Organized by individual syntax constructs, but may be reorganized
@@ -9,7 +9,7 @@ See also [anti-babel]() for specific refactoring samples.
 Any reviews, and more samples are welcomed (Pull Requests please).
 
 <!-- 
-curl -s http://www.graspjs.com/docs/syntax-js/ | cheerio "h3" | prefix "## " 
+curl http://www.graspjs.com/docs/syntax-js/ | cheerio "h3" | prefix "## " 
 -->
 
 ## program (Program)
@@ -41,8 +41,6 @@ Since s query and e query both have support for more specific literals
 	grasp  'if.test!>literal'  
 
 
-
-## prop (Property)
 
 
 ## empty (EmptyStatement)
@@ -102,7 +100,7 @@ Empty catch blocks
 	# TODO: useless ES bind 
 	
 
-## exp-statement (ExpressionStatement)
+## expatement (ExpressionStatement)
 ## if (IfStatement)
 
 ### Oneliner ifs
@@ -168,6 +166,13 @@ functions with parameters with specific name pattern
 
 
 ## func-exp (FunctionExpression)
+
+	# event handlers declared on dojo widget 
+	grasp "call[callee=#declare].args:nth(1)>prop[key=#/^h[A-Z]/][value=func-exp]"  
+
+	# one liner event handlers declared on dojo widget (do we really need them)
+	grasp  '(call[callee=#declare].args:nth(1)>prop[key=#/^h[A-Z]/]>func-exp)!.body>*:first-child:last-child'
+
 
 ## var-decs (VariableDeclaration)
 
@@ -238,6 +243,11 @@ finding (one of the styles) validation functions
 	# normalizing to array
 	grasp -e '__ || []'
 
+
+
+	# empty array
+	grasp 'arr:not(arr! > *)'
+
 ## obj (ObjectExpression)
 
 ### obj.props
@@ -250,6 +260,9 @@ Objects {} that have Property with a certain name:
 
 	grasp '*!>obj.props[key=#columns])'
 
+	# or (see prop)
+	grasp 'obj! > prop[key=#columns]'
+
 Property with a name matching pattern:
 	
 	grasp 'func-dec[id=#/^vali/]'
@@ -260,6 +273,29 @@ Property with a name matching pattern and specified type:
 	grasp 'prop[key=#/^vali/][val=func-exp]' 
 
 
+## prop (Property)
+
+### Objects {} that have Property with a certain name:
+
+	grasp 'obj! > prop[key=#columns]'
+
+
+### Object without property with some name
+
+	grasp 'obj:not(obj! > prop[key=#test])' 
+
+### Object with property a but without property b
+
+	grasp '(obj!>prop[key=#a]):not(obj! > prop[key=#b])' 
+	
+	# or
+	grasp 'obj! prop[key=#a]:not(prop[key=#a]!~prop[key=#b])' 
+	
+
+### Empty object literal {}
+
+	# empty object literals
+	grasp 'obj:not(obj! > prop[key])'
 
 ## seq (SequenceExpression)
 
@@ -308,14 +344,17 @@ Extracting regexps from code, useful for review, DRY, safety, correctness
 
 ## call (CallExpression)
 
-### call.callee
+### call.callee, call.member
+
+	# Promises, x.then() or when()
+	grasp 'call[callee=(#when, member[prop=#then])]'
 
 #### Find call of function or method with given name
 
 This demonstrates finding all Mocha test methods
 
 	# x.it() or it()
-	grasp "call[callee=(#it, member[prop=#it])]" -r
+	grasp 'call[callee=(#it, member[prop=#it])]' -r
 
 The later the searches are more specific by adding another constructions
 for example:
@@ -323,12 +362,12 @@ for example:
 #### Extracting first method param
 Test method descriptions (for docs or review)
 
-	grasp -o -s 'call[callee=(#it, member[prop=#it])].args:nth(0)'
+	grasp -o 'call[callee=(#it, member[prop=#it])].args:nth(0)'
 
 #### Count method usage per file
 Count number of features (in BDD tests) 
 
-	grasp --no-color -c -s 'call[callee=(#it, member[prop=#it])]' -r | grep -v ":0$"
+	grasp --no-color -c 'call[callee=(#it, member[prop=#it])]' -r | grep -v ":0$"
 
 ### call.arguments
 
