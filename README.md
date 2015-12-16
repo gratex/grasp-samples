@@ -38,7 +38,7 @@ Since s query and e query both have support for more specific literals
 (see http://www.graspjs.com/docs/squery/#literals), do we need this ?
 
 	# Literals in if statement (not very practical, see num and str)
-	grasp -s 'if.test!>literal'  
+	grasp  'if.test!>literal'  
 
 
 
@@ -54,16 +54,16 @@ Since s query and e query both have support for more specific literals
 ### Coding style
 
 	# adding missing curly braces
-	grasp -s "if.then:not(block)" -R '{{{}}}' -i 
+	grasp "if.then:not(block)" -R '{{{}}}' -i 
 
 ### Empty blocks
 
-	grasp -s 'block:not(block! > *)'
+	grasp 'block:not(block! > *)'
 
 Empty catch blocks
 
 	# TODO: using catch body ?
-	grasp -s 'catch>block:not(block! > *)' -r 
+	grasp 'catch>block:not(block! > *)' -r 
 
 ### Empty functions
 
@@ -84,20 +84,20 @@ Empty catch blocks
 	block.body:matches
 
 	# ifs with return in the if block
-	grasp -s 'if:matches(if! block.body:matches(return))' 
+	grasp 'if:matches(if! block.body:matches(return))' 
 	
 	# ifs with return in the if block followed by return 
-	grasp -s 'if:matches(if! block.body:matches(return))!~return' 
+	grasp 'if:matches(if! block.body:matches(return))!~return' 
 
 	# ifs with return in the if block followed immediately by return 
-	grasp -s '*!>if:matches(if! block.body:matches(return))+return' -r
+	grasp '*!>if:matches(if! block.body:matches(return))+return' -r
 
 	# TODO: ifs without else, with return in the if block followed immediately by return 
 
 ### Block not containing something
 
 	# useless dojo hitch, hitch(this,f) where f is not using this at all
-	grasp -s "call[callee=member[prop=#hitch]].arguments:nth(1):matches(func-exp).body:not(block! this)" 
+	grasp "call[callee=member[prop=#hitch]].arguments:nth(1):matches(func-exp).body:not(block! this)" 
 
 	# TODO: useless ES bind 
 	
@@ -113,7 +113,7 @@ Empty catch blocks
 
 ### Ifs without else
 
-	grasp -s 'if:not([else])'
+	grasp 'if:not([else])'
 
 ### If with single return statements 
 
@@ -121,14 +121,14 @@ Usually used as quick exit inside functions or loops
 (in loops it may indicate filter semantics)
 
 	# TODO: better ? we do not like the first: hack
-	grasp -s 'if.consequent.body:first(return)'
+	grasp 'if.consequent.body:first(return)'
 
 ### Ifs without else and no return 	
 
 TODO: why is this interesting ? motivation please (basically if that are not quick exits).
 I do not like these in code, but need to remember why/when we have used this
 
-	grasp -s 'if:not([else]).consequent:not(block! return)'
+	grasp 'if:not([else]).consequent:not(block! return)'
 
 ### Useless else
 	
@@ -157,7 +157,18 @@ I do not like these in code, but need to remember why/when we have used this
 ## for (ForStatement)
 ## for-in (ForInStatement)
 ## debugger (DebuggerStatement)
+
 ## func-dec (FunctionDeclaration)
+
+### func-dec.params
+
+functions with parameters with specific name pattern
+
+	grasp '(func-dec,func-exp).params:matches(#/Html$/i)'  
+
+
+## func-exp (FunctionExpression)
+
 ## var-decs (VariableDeclaration)
 
 ## var-dec (VariableDeclarator)
@@ -176,10 +187,10 @@ How many variables are declared on the same line ?
 ### Names of variables
 can be used to enforce naming conventions, check against 'data dictionary' or simply spell check.
 
-	grasp -s -o "var-dec.id"
+	grasp -o "var-dec.id"
 
 	# top 10 favorite variable names
-	grasp -s -o "var-dec.id" -r | cut -d":" -f3 | sort | uniq -c | sort -k1,1nr | head -n10
+	grasp -o "var-dec.id" -r | cut -d":" -f3 | sort | uniq -c | sort -k1,1nr | head -n10
 	  92 i
 	  32 p
 	  31 args
@@ -193,12 +204,12 @@ can be used to enforce naming conventions, check against 'data dictionary' or si
 
 Finding variables with given name
 
-	grasp -s -o "var-dec[id=#_this]" -r
+	grasp -o "var-dec[id=#_this]" -r
 
 ### Declaring empty object, array
 
 	# echo "var x={},y={};" | 
-	grasp -s 'var-dec[init=obj:not(obj! > prop[key])]' 
+	grasp 'var-dec[init=obj:not(obj! > prop[key])]' 
 
 	# TODO: array
 
@@ -207,13 +218,13 @@ Finding variables with given name
 finding (one of the styles) validation functions
 
 	# var vali*=function(){}
-	grasp -s 'var-dec[id=#/^vali/][init=func-exp]' -r misc/grasp/test/
+	grasp 'var-dec[id=#/^vali/][init=func-exp]' -r misc/grasp/test/
 
 
 	grasp-find-function(){
 		name="$1"
 		shift
-		grasp -s \
+		grasp \
 			'func-dec[id=#/^'$name'/],var-dec[id=#/^'"$name"'/][init=func-exp],prop[key=#/^'"$name"'/][val=func-exp]' \
 			-r "$@"
 	}
@@ -241,7 +252,7 @@ Objects {} that have Property with a certain name:
 
 Property with a name matching pattern:
 	
-	grasp -s 'func-dec[id=#/^vali/]'
+	grasp 'func-dec[id=#/^vali/]'
 
 Property with a name matching pattern and specified type:
 
@@ -249,7 +260,7 @@ Property with a name matching pattern and specified type:
 	grasp 'prop[key=#/^vali/][val=func-exp]' 
 
 
-## func-exp (FunctionExpression)
+
 ## seq (SequenceExpression)
 
 ## unary (UnaryExpression)
@@ -269,10 +280,10 @@ Property with a name matching pattern and specified type:
 	# conditional return based on typeof
 	# return (typeof that == "string") ? decomp(that) : clone(that);
 
-	grasp -s "return!.arg unary[op=typeof]" 
+	grasp "return!.arg unary[op=typeof]" 
 
 	# typeof used inside ifs
-	grasp -s "if.test unary[op=typeof]" -r
+	grasp "if.test unary[op=typeof]" -r
 	
 ## bi (BinaryExpression)
 ## assign (AssignmentExpression)
@@ -304,7 +315,7 @@ Extracting regexps from code, useful for review, DRY, safety, correctness
 This demonstrates finding all Mocha test methods
 
 	# x.it() or it()
-	grasp -s "call[callee=(#it, member[prop=#it])]" -r
+	grasp "call[callee=(#it, member[prop=#it])]" -r
 
 The later the searches are more specific by adding another constructions
 for example:
@@ -325,23 +336,58 @@ Count number of features (in BDD tests)
 Find async it(done) methods, that use done syntax
 
 	# it('stringifies buffer values', function (done) {
-	grasp -s  'call[callee=(#it, member[prop=#it])].arguments:nth(1):matches(func-exp).params:first'
+	grasp  'call[callee=(#it, member[prop=#it])].arguments:nth(1):matches(func-exp).params:first'
+
+
 
 
 ## member (MemberExpression)
+
 ## switch-case (SwitchCase)
+
 ## catch (CatchClause)
+
 ## statement (Statement)
+
 ## dec (Declaration)
+
 ## exp (Expression)
+
 ## clause (Clause)
+
 ## biop (BiOp)
+
 ## func (Function)
+
 ## for-loop (ForLoop)
+
 ## while-loop (WhileLoop)
+
 ## loop (Loop)
 
+	# files with many loops 
+	grasp --no-color -c 'loop' -r | grep -v ":0$" | sort -t":" -k2,2nr
+
+	# 'size of loops'
+	grasp --no-color -c 'loop>*' -r | grep -v ":0$" | sort -t":" -k2,2nr
+
+	# number if ifs inside the loop (sort of complexity metrics, but there are better detectors)
+	grasp --no-color -c 'loop if' -r | grep -v ":0$" | sort -t":" -k2,2nr
+
+
+	# loop with single push (sort of map ?)
+	grasp 'loop!.body>*:first-child:last-child>call[callee=(member[prop=#push])]' 
 # Misc
+
+## first-child, last-child
+	
+### Detect oneliners 
+	
+	# TODO: maybe there is better way ?	
+	grasp 'for-in!.body>*:first-child:last-child'
+	
+	# oneliner function
+	grasp -e 'function(_$){__}'
 
 ## regex, RegExp
 
