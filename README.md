@@ -104,6 +104,46 @@ Empty catch blocks
 
 ## exp-statement (ExpressionStatement)
 ## if (IfStatement)
+
+### Oneliner ifs
+
+	# oneliner ifs shall be refactored
+	grasp -e 'if(__){__}' 
+	grasp -e 'if($x){$y}' -R '{{x}} && ({{y}})' 
+
+### Ifs without else
+
+	grasp -s 'if:not([else])'
+
+### If with single return statements 
+
+Usually used as quick exit inside functions or loops 
+(in loops it may indicate filter semantics)
+
+	# TODO: better ? we do not like the first: hack
+	grasp -s 'if.consequent.body:first(return)'
+
+### Ifs without else and no return 	
+
+TODO: why is this interesting ? motivation please (basically if that are not quick exits).
+I do not like these in code, but need to remember why/when we have used this
+
+	grasp -s 'if:not([else]).consequent:not(block! return)'
+
+### Useless else
+	
+	# if(){throw}else{...code}, can be if{throw}...code (in most cases)
+	# no need for else usually, but of course check the code context
+	grasp  'if[else].consequent!>throw'
+
+### if(x.length) checking for length
+
+	# check if array/string, checks for  non empty array
+	# hard to say, missing semantics
+	grasp -e 'if(__.length){__}else{__}'
+
+
+
 ## label (LabeledStatement)
 ## break (BreakStatement)
 ## continue (ContinueStatement)
@@ -181,8 +221,34 @@ finding (one of the styles) validation functions
 
 
 ## this (ThisExpression)
+
 ## arr (ArrayExpression)
+
+	# normalizing to array
+	grasp -e '__ || []'
+
 ## obj (ObjectExpression)
+
+### obj.props
+
+Property with a certain name:
+
+	grasp 'obj.props[key=#columns])'
+
+Objects {} that have Property with a certain name:
+
+	grasp '*!>obj.props[key=#columns])'
+
+Property with a name matching pattern:
+	
+	grasp -s 'func-dec[id=#/^vali/]'
+
+Property with a name matching pattern and specified type:
+
+	# {vali*: function(){}}
+	grasp 'prop[key=#/^vali/][val=func-exp]' 
+
+
 ## func-exp (FunctionExpression)
 ## seq (SequenceExpression)
 
@@ -214,9 +280,26 @@ finding (one of the styles) validation functions
 ## logic (LogicalExpression)
 ## cond (ConditionalExpression)
 ## new (NewExpression)
+
+Extracting regexps from code, useful for review, DRY, safety, correctness
+
+	grasp -o 'new[callee=#RegExp].args:first'
+
+	# regexp build from variables, concats (something else then static strings)
+	# are they sanitized ?
+	
+	grasp '*!>new[callee=#RegExp].args:first:not(String)'
+
+	# regexps build from string (useless, use literal form //) 
+	# new RegExp("/test/");
+
+	grasp '*!>new[callee=#RegExp].args:first(String)'
+
 ## call (CallExpression)
 
-### Find call of function or method with given name
+### call.callee
+
+#### Find call of function or method with given name
 
 This demonstrates finding all Mocha test methods
 
@@ -226,17 +309,19 @@ This demonstrates finding all Mocha test methods
 The later the searches are more specific by adding another constructions
 for example:
 
-### Extracting first method param
+#### Extracting first method param
 Test method descriptions (for docs or review)
 
 	grasp -o -s 'call[callee=(#it, member[prop=#it])].args:nth(0)'
 
-### Count method usage per file
+#### Count method usage per file
 Count number of features (in BDD tests) 
 
 	grasp --no-color -c -s 'call[callee=(#it, member[prop=#it])]' -r | grep -v ":0$"
 
-### Find calls with at least one arguments 
+### call.arguments
+
+#### Find calls with at least one arguments 
 Find async it(done) methods, that use done syntax
 
 	# it('stringifies buffer values', function (done) {
@@ -255,6 +340,10 @@ Find async it(done) methods, that use done syntax
 ## for-loop (ForLoop)
 ## while-loop (WhileLoop)
 ## loop (Loop)
+
+# Misc
+
+## regex, RegExp
 
 
 [AMD]: https://en.wikipedia.org/wiki/Asynchronous_module_definition
