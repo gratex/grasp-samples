@@ -386,7 +386,19 @@ Finding "object[__] = something"
 	
 	
 ## bi (BinaryExpression)
+	
+### bi.op +
+
+	# Naive (uri building detection)
+	# TODO: nicer
+	grasp -s 'bi[op=+]:matches([left="/"],[left="?"],[left="#"],[right="/"],[right="?"],[right="#"])' 
+
 ## assign (AssignmentExpression)
+
+	# setting value of specific property
+	# dojo validation set by code
+	grasp -e '__.constraints.__=__'
+
 ## update (UpdateExpression)
 ## logic (LogicalExpression)
 ## cond (ConditionalExpression)
@@ -554,11 +566,7 @@ dojo style inheritance (declare)
 
 # Misc
 
-### Concat strings
 	
-	# Naive (uri building detection)
-	# TODO: nicer
-	grasp -s 'bi[op=+]:matches([left="/"],[left="?"],[left="#"],[right="/"],[right="?"],[right="#"])' 
 
 ### Subsequent calls of the same function
 
