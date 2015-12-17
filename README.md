@@ -166,7 +166,7 @@ The most commonly used ternary IF form
 ## for (ForStatement)
 ## for-in (ForInStatement)
 
-### forIn with single return 
+forIn with single return 
 
 	grasp 'call[callee=member[obj=#df][prop=#forIn]]! if block.body:matches(return)' -- UI/app-ui/src/main/webapp/WEB-INF/views/common/extensions/dgrid/Grid.js
 
@@ -420,6 +420,31 @@ Find async it(done) methods, that use done syntax
 	grasp  'call[callee=(#it, member[prop=#it])].arguments:nth(1):matches(func-exp).params:first'
 
 
+Adding the 4th parameter to 3-parameter calls 
+
+grasp -i -e 'tsta($a,$b,$c)' -R 'tsta({{a}},{{b}},{{c}},"")' ./tests/web-services/urls.spec.js
+
+Params order changing
+
+grasp -i -e 'tsta($a,$b,$c,$d)' -R 'tsta({{a}},{{c}},{{b}},{{d}})' ./tests/web-services/urls.spec.js
+
+
+Print 2nd and 3rd params (REVIEW: please!)
+
+	grasp -o -s 'call[callee=member[prop=#withWidgets]].arguments:nth(1),call[callee=member[prop=#withWidgets]]' \
+		-R 'XXX:{{.arguments:slice(1,3) | join ";" }}' 2>/dev/null 
+		UI/*-ui/src/main/webapp/WEB-INF/views/ |\
+		grep "XXX:" | sed "s;XXX:;;"
+
+
+Map(filter) and filter(map)
+
+grasp -s "call[callee.prop=(#map)].args:first(call[callee.prop=(#filter)])" -r UI/*-ui/src/main/webapp/WEB-INF/views 2>/dev/null
+grasp -s "call[callee.prop=(#filter)].args:first(call[callee.prop=(#map)])" -r UI/*-ui/src/main/webapp/WEB-INF/views 2>/dev/null
+
+
+
+
 ## member (MemberExpression)
 
 ## switch-case (SwitchCase)
@@ -474,7 +499,18 @@ Replace with inline replacer function
 ### Find all methods resolveUiCtx/resolveSvcCtx that use string concats as params
 
 	grasp -e "__.resolveUiCtx( __ + __ )" -r UI/*-ui/src/main/webapp/WEB-INF/views/ 2>/dev/null
+
 	grasp -e "__.resolveSvcCtx( __ + __ )" -r UI/*-ui/src/main/webapp/WEB-INF/views/ 
+
+
+### Concatenation of 2nd and 3rd params(concat string)
+
+	grasp -e 'fn($a,$b,$c)' -R 'fn({{a}}, {{b}} + " " + {{c}})'
+
+	grasp -e 'fn($a,$b,$c)' -R 'fn({{a}}, {{c}}.concat({{b}}))'
+
+
+
 
 ## for-loop (ForLoop)
 
