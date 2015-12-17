@@ -1,12 +1,17 @@
-# graspmples
+# grasp-samples
 
 This is our collection of various grasp samples.
 Organized by individual syntax constructs, but may be reorganized
-later. It shell give you inspiration on how the grasp (but also other AST based tools) can be used in coding practice.
+later. 
+It shell give you inspiration on how the grasp 
+(maybe also with other AST based tools). 
 
+Can be used in coding practice checks, QA and refactoring.
 See also [anti-babel]() for specific refactoring samples.
 
 Any reviews, and more samples are welcomed (Pull Requests please).
+
+Many codes reference dojo APIs as samples, but try to be framework agnostic.
 
 <!-- 
 curl http://www.graspjs.com/docs/syntax-js/ | cheerio "h3" | prefix "## " 
@@ -66,7 +71,7 @@ Empty catch blocks
 ### Empty functions
 
 	# empty function (TODO: s query for other variants)	
-	grasp -e 'function $name(__){}' -r misc/grasp/test/
+	grasp -e 'function $name(__){}' 
 
 ### One Liner blocks
 	
@@ -145,19 +150,21 @@ I do not like these in code, but need to remember why/when we have used this
 
 Useless ternary if
 
-	grasp -e "__ ? true : false" -r UI/*-ui/src/main/webapp/WEB-INF/views/ 2>/dev/null
+	grasp -e "__ ? true : false" 
+	# TODO: add refactoring
 
 The most commonly used ternary IF form
 
-	grasp -e '$x ? $x : __' -r UI/*-ui/src/main/webapp/WEB-INF/views/ 2>/dev/null
+	grasp -e '$x ? $x : __' 
 
 
 
 
 ### If params sorted by occurrences
 	
-	# better output with "more" command instead of "less"
-	grasp -s -o --no-filename --line-number=false "if.test" | trim | cnt | less	
+	# Top 10 'popular' if statements
+	# TODO: motivation, sample
+	grasp -s -o --no-filename --line-number=false "if.test" | sort | uniq -c | head -n 10
 
 ## label (LabeledStatement)
 ## break (BreakStatement)
@@ -173,28 +180,29 @@ The most commonly used ternary IF form
 ## for-in (ForInStatement)
 
 
-####forIn with single return 
+#### forIn with single return 
 
-	grasp 'call[callee=member[obj=#df][prop=#forIn]]! if block.body:matches(return)' -- UI/app-ui/src/main/webapp/WEB-INF/views/common/extensions/dgrid/Grid.js
-
-
+	# TODO: motivation ?
+	grasp 'call[callee=member[obj=#df][prop=#forIn]]! if block.body:matches(return)' 
 
 ### Oneliner for-in
 	
-	grasp -s 'for-in!.body *:first-child:last-child' -r path/to/directory/
+	grasp -s 'for-in!.body *:first-child:last-child' 
 
 	# for in with 'single' push
-	grasp -s 'for-in.body>*:first-child:last-child>call[callee=(member[prop=#push])]' -r path/to/directory/
+	# TODO: motivation ?
+	grasp -s 'for-in.body>*:first-child:last-child>call[callee=(member[prop=#push])]' 
 
 
 ## debugger (DebuggerStatement)
 
+	## TODO: remove all debugger statements
+
 ## func-dec (FunctionDeclaration)
 
 ### func-dec.params
-
-functions with parameters with specific name pattern
-
+	
+	# functions with parameters with specific name pattern
 	grasp '(func-dec,func-exp).params:matches(#/Html$/i)'  
 
 
@@ -215,7 +223,7 @@ functions with parameters with specific name pattern
 
 Count of (evil) variables per file
 
-	grasp -c "var-dec" -r
+	grasp -c "var-dec" 
 
 How many variables are declared on the same line ?
 	
@@ -229,6 +237,7 @@ can be used to enforce naming conventions, check against 'data dictionary' or si
 
 	# top 10 favorite variable names
 	grasp -o "var-dec.id" -r | cut -d":" -f3 | sort | uniq -c | sort -k1,1nr | head -n10
+	
 	  92 i
 	  32 p
 	  31 args
@@ -256,7 +265,7 @@ Finding variables with given name
 finding (one of the styles) validation functions
 
 	# var vali*=function(){}
-	grasp 'var-dec[id=#/^vali/][init=func-exp]' -r misc/grasp/test/
+	grasp 'var-dec[id=#/^vali/][init=func-exp]' 
 
 
 	grasp-find-function(){
@@ -363,15 +372,8 @@ Finding "object[__] = something"
 	grasp "return!.arg unary[op=typeof]" 
 
 	# typeof used inside ifs
+	# TODO: motivation ? 
 	grasp "if.test unary[op=typeof]" -r
-	
-	# conditional based on typeof
-	grasp -e 'typeof $X === "function"?$X():$X' -r path/to/directory/
-
-	# typeof "function" (=== or ==)
-	grasp -e 'typeof $X == "function" ' -r path/to/directory/
-	grasp -e 'typeof $X === "function" ' -r path/to/directory/
-	
 	
 	
 ## bi (BinaryExpression)
@@ -412,25 +414,16 @@ This demonstrates finding all Mocha test methods
 Function or method CALL with specific name and second parameter is function	
 
 	# x.it(__,function(){}) or it(__,function(){})
-	grasp -s  "call[callee=(#it, member[prop=#it])].arguments:nth(1):matches(func-exp)" \
-		-r misc/grasp/test/
+	grasp -s  "call[callee=(#it, member[prop=#it])].arguments:nth(1):matches(func-exp)" 
 
 Function or method CALL with specific name, second parameter is function and body contains return
 
 	# x.it(__,function(done){ return }) or it(__,function(done){ return }) 
-	grasp -s  "call[callee=(#it, member[prop=#it])]! .arguments:nth(1):matches(func-exp! return).params:first" \
-		-r misc/grasp/test/
-
-Pattern matching  sample for immediately invoked function expression (PREFIX)
-
-	grasp -s "call[callee=#/^gree/]" -r UI/tst-ui/src/main/webapp/WEB-INF/views/training/first-form/grasp-training/Screen.js
-
-Pattern matching  sample for immediately invoked function expression (SUFFIX)
-
-	grasp -s "call[callee=#/Age$/]" -r UI/tst-ui/src/main/webapp/WEB-INF/views/training/first-form/grasp-training/Screen.js
+	grasp -s  "call[callee=(#it, member[prop=#it])]! .arguments:nth(1):matches(func-exp! return).params:first" 
 
 
 #### Extracting first method param
+
 Test method descriptions (for docs or review)
 
 	grasp -o 'call[callee=(#it, member[prop=#it])].args:nth(0)'
@@ -438,10 +431,12 @@ Test method descriptions (for docs or review)
 
 #### Find innerHtml without encoding
 
-	grasp -s "call[callee=(obj, [obj=#html][prop=#set])].args:nth(1):not(call[callee=(obj, [obj=(#encHtml, #enc)])])" -r UI/*-ui/src/main/webapp/WEB-INF/views/ 2>/dev/null
+	# applies to dojo set.html and our encoder method names
+	grasp -s "call[callee=(obj, [obj=#html][prop=#set])].args:nth(1):not(call[callee=(obj, [obj=(#encHtml, #enc)])])"
 
 
 #### Count method usage per file
+
 Count number of features (in BDD tests) 
 
 	grasp --no-color -c 'call[callee=(#it, member[prop=#it])]' -r | grep -v ":0$"
@@ -450,43 +445,35 @@ Count number of features (in BDD tests)
 
 #### Find calls with at least one arguments 
 
+	# TODO:
 
-
-####Find async it(done) methods, that use done syntax
+#### Find async it(done) methods, that use done syntax
 
 	# it('stringifies buffer values', function (done) {
 	grasp  'call[callee=(#it, member[prop=#it])].arguments:nth(1):matches(func-exp).params:first'
 
+#### Adding the 4th parameter to 3-parameter calls 
+
+	grasp -i -e 'tsta($a,$b,$c)' -R 'tsta({{a}},{{b}},{{c}},"")' 
+
+#### Changing order of params
+
+	grasp -i -e 'tsta($a,$b,$c,$d)' -R 'tsta({{a}},{{c}},{{b}},{{d}})' 
 
 
-####Adding the 4th parameter to 3-parameter calls 
+#### Detecting Nested Function Calls 
 
-	grasp -i -e 'tsta($a,$b,$c)' -R 'tsta({{a}},{{b}},{{c}},"")' ./tests/web-services/urls.spec.js
-
-####Params order changing
-
-	grasp -i -e 'tsta($a,$b,$c,$d)' -R 'tsta({{a}},{{c}},{{b}},{{d}})' ./tests/web-services/urls.spec.js
-
-
-####Print 2nd and 3rd params (REVIEW: please!)
-
-	grasp -o -s 'call[callee=member[prop=#withWidgets]].arguments:nth(1),call[callee=member[prop=#withWidgets]]' \
-		-R 'XXX:{{.arguments:slice(1,3) | join ";" }}' 2>/dev/null 
-		UI/*-ui/src/main/webapp/WEB-INF/views/ |\
-		grep "XXX:" | sed "s;XXX:;;"
-
-
-####Map(filter) and filter(map)
-
-	grasp -s "call[callee.prop=(#map)].args:first(call[callee.prop=(#filter)])" -r UI/*-ui/src/main/webapp/WEB-INF/views 2>/dev/null
-	grasp -s "call[callee.prop=(#filter)].args:first(call[callee.prop=(#map)])" -r UI/*-ui/src/main/webapp/WEB-INF/views 2>/dev/null
+	# ((())) style
+	# Map(filter) and filter(map) (dojo style)
+	grasp -s "call[callee.prop=(#map)].args:first(call[callee.prop=(#filter)])" 
+	grasp -s "call[callee.prop=(#filter)].args:first(call[callee.prop=(#map)])" 
 
 
 
 ### Find parseInt(__,*!number*)
 
 	# TODO: parseInt() number not between x and y
-	grasp 'call[callee=#parseInt]!.arguments:last-child:not(*number*)' -r misc/grasp/
+	grasp 'call[callee=#parseInt]!.arguments:last-child:not(10)' 
 
 
 
@@ -500,29 +487,31 @@ Count number of features (in BDD tests)
 
 ## dec (Declaration)
 
+dojo style inheritance (declare)
+
 	# files using declare, how many components using dojo inheritance do we have ?
-	grasp -w "call[callee=#declare]" -r UI/*-ui/src/main/webapp/WEB-INF/views | wc -l
+	grasp -w "call[callee=#declare]" -r | wc -l
 	
 	# not inherited from anything
-	grasp -o "call[callee=#declare].args:nth(0):matches(null)" -r UI/*-ui/src/main/webapp/WEB-INF/views
+	grasp -o "call[callee=#declare].args:nth(0):matches(null)"
 	
 	# inherited from empty array ?
-	grasp -o "call[callee=#declare].args:nth(0):matches(arr:not(arr! > *))" -r UI/*-ui/src/main/webapp/WEB-INF/views
+	grasp -o "call[callee=#declare].args:nth(0):matches(arr:not(arr! > *))" 
 
 	# first of parents
-	grasp -o "call[callee=#declare].args:nth(0).elements:head" -r UI/*-ui/src/main/webapp/WEB-INF/views
+	grasp -o "call[callee=#declare].args:nth(0).elements:head" 
 
 	# inherited from more then one
-	grasp -o "call[callee=#declare].args:nth(0).elements:nth(1)" -r UI/*-ui/src/main/webapp/WEB-INF/views
+	grasp -o "call[callee=#declare].args:nth(0).elements:nth(1)" 
 		
 	# inherited from Grid, parent is grid
-	grasp -o "call[callee=#declare].args:nth(0).elements:first:matches(#Grid)" -r UI/*-ui/src/main/webapp/WEB-INF/views
+	grasp -o "call[callee=#declare].args:nth(0).elements:first:matches(#Grid)" 
 	
 	# inherited or mixed with grid
-	grasp -o 'call[callee=#declare].args:nth(0)>#Grid' -r UI/*-ui/src/main/webapp/WEB-INF/views | wc -l
+	grasp -o 'call[callee=#declare].args:nth(0)>#Grid' -r | wc -l
 
 	# mixed Grid (does it makes sence ?)
-	grasp -o 'call[callee=#declare].args:nth(0).elements:tail:matches(#Grid)' -r UI/*-ui/src/main/webapp/WEB-INF/views | wc -l
+	grasp -o 'call[callee=#declare].args:nth(0).elements:tail:matches(#Grid)' -r | wc -l
 
 ## exp (Expression)
 
@@ -532,12 +521,10 @@ Count number of features (in BDD tests)
 
 ## func (Function)
 
-
-	# Functions with Attributes Parameters with specific name
-	grasp '(func-dec,func-exp).params:matches(#/Html$/i)'  -r UI/app-ui/src/main/webapp/resources/dijit
-
-
 ## for-loop (ForLoop)
+
+	# TODO: for loop without i used inside block {}
+	# modifying for loops, TODO: refactor to while ?
 
 ## while-loop (WhileLoop)
 
@@ -556,22 +543,20 @@ Count number of features (in BDD tests)
 	# loop with single push (sort of map ?)
 	grasp 'loop!.body>*:first-child:last-child>call[callee=(member[prop=#push])]' 
 
-	# files with count of ifs inside loops, removed zero occurrences
-	grasp --no-color --no-bold -c "(for,while,do-while,for-in) if" -r path/to/directory/ | sort -t":" -k2,2n | grep -v ":0$"
-
-	# output of ifs inside loops
-	grasp -s "(for,while,do-while,for-in) if" -r path/to/directory/
-
 # Misc
 
 ### Concat strings
 	
 	# Naive (uri building detection)
-	grasp -s 'bi[op=+]:matches([left="/"],[left="?"],[left="#"],[right="/"],[right="?"],[right="#"])' -r misc/grasp/test/
+	# TODO: nicer
+	grasp -s 'bi[op=+]:matches([left="/"],[left="?"],[left="#"],[right="/"],[right="?"],[right="#"])' 
 
-### set, set
-	
-	grasp  -e '{\_$;$w.set(\_$);$w.set(\_$);\_$}' -r path/to/directory/
+### Subsequent calls of the same function
+
+	## TODO: push push vs push
+	## detector for both
+	## see http://jsperf.com/pushpush
+
 
 ## first-child, last-child
 	
@@ -586,9 +571,9 @@ Count number of features (in BDD tests)
 ## regex, RegExp
 
 	# literal containing "/"
-	grasp -s 'bi[op=+][left=literal[value~=/^[\/].*/]]' -r misc/grasp/
+	grasp -s 'bi[op=+][left=literal[value~=/^[\/].*/]]' 
 
 	# concat of strings containing one of "/","#","?"	
-	grasp -s 'bi[op=+]:matches([left=literal[value~=/[\/#?]/]],[right=literal[value~=/[\/#?]/]])' -r misc/grasp/
+	grasp -s 'bi[op=+]:matches([left=literal[value~=/[\/#?]/]],[right=literal[value~=/[\/#?]/]])' 
 
 [AMD]: https://en.wikipedia.org/wiki/Asynchronous_module_definition
