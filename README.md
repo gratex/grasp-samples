@@ -380,7 +380,8 @@ Function or method CALL with specific name and second parameter is function
 	grasp -s  "call[callee=(#it, member[prop=#it])].arguments:nth(1):matches(func-exp)" \
 		-r misc/grasp/test/
 
-...and body contains return (somewhere in body)	
+Function or method CALL with specific name, second parameter is function and body contains return
+
 	# x.it(__,function(done){ return }) or it(__,function(done){ return }) 
 	grasp -s  "call[callee=(#it, member[prop=#it])]! .arguments:nth(1):matches(func-exp! return).params:first" \
 		-r misc/grasp/test/
