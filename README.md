@@ -140,6 +140,7 @@ I do not like these in code, but need to remember why/when we have used this
 	# hard to say, missing semantics
 	grasp -e 'if(__.length){__}else{__}'
 
+
 #### Ternary IF statements
 
 Useless ternary if
@@ -152,6 +153,11 @@ The most commonly used ternary IF form
 
 
 
+
+### If params sorted by occurrences
+	
+	# better output with "more" command instead of "less"
+	grasp -s -o --no-filename --line-number=false "if.test" | trim | cnt | less	
 
 ## label (LabeledStatement)
 ## break (BreakStatement)
@@ -166,10 +172,19 @@ The most commonly used ternary IF form
 ## for (ForStatement)
 ## for-in (ForInStatement)
 
+
 ####forIn with single return 
 
 	grasp 'call[callee=member[obj=#df][prop=#forIn]]! if block.body:matches(return)' -- UI/app-ui/src/main/webapp/WEB-INF/views/common/extensions/dgrid/Grid.js
 
+
+
+### Oneliner for-in
+	
+	grasp -s 'for-in!.body *:first-child:last-child' -r path/to/directory/
+
+	# for in with 'single' push
+	grasp -s 'for-in.body>*:first-child:last-child>call[callee=(member[prop=#push])]' -r path/to/directory/
 
 
 ## debugger (DebuggerStatement)
@@ -315,6 +330,17 @@ Property with a name matching pattern and specified type:
 	# empty object literals
 	grasp 'obj:not(obj! > prop[key])'
 
+
+### Computed property names ES6 
+
+Finding "object[__] = something"
+
+	# TODO: finetune and exclude some patterns
+	grasp -e '__[_exp]=__;' -r 
+	
+	grasp -s ' exp-statement assign[left=member[computed=true]]' -r
+
+
 ## seq (SequenceExpression)
 
 ## unary (UnaryExpression)
@@ -338,6 +364,15 @@ Property with a name matching pattern and specified type:
 
 	# typeof used inside ifs
 	grasp "if.test unary[op=typeof]" -r
+	
+	# conditional based on typeof
+	grasp -e 'typeof $X === "function"?$X():$X' -r path/to/directory/
+
+	# typeof "function" (=== or ==)
+	grasp -e 'typeof $X == "function" ' -r path/to/directory/
+	grasp -e 'typeof $X === "function" ' -r path/to/directory/
+	
+	
 	
 ## bi (BinaryExpression)
 ## assign (AssignmentExpression)
@@ -423,6 +458,7 @@ Count number of features (in BDD tests)
 	grasp  'call[callee=(#it, member[prop=#it])].arguments:nth(1):matches(func-exp).params:first'
 
 
+
 ####Adding the 4th parameter to 3-parameter calls 
 
 	grasp -i -e 'tsta($a,$b,$c)' -R 'tsta({{a}},{{b}},{{c}},"")' ./tests/web-services/urls.spec.js
@@ -447,6 +483,12 @@ Count number of features (in BDD tests)
 
 
 
+### Find parseInt(__,*!number*)
+
+	# TODO: parseInt() number not between x and y
+	grasp 'call[callee=#parseInt]!.arguments:last-child:not(*number*)' -r misc/grasp/
+
+
 
 ## member (MemberExpression)
 
@@ -458,6 +500,30 @@ Count number of features (in BDD tests)
 
 ## dec (Declaration)
 
+	# files using declare, how many components using dojo inheritance do we have ?
+	grasp -w "call[callee=#declare]" -r UI/*-ui/src/main/webapp/WEB-INF/views | wc -l
+	
+	# not inherited from anything
+	grasp -o "call[callee=#declare].args:nth(0):matches(null)" -r UI/*-ui/src/main/webapp/WEB-INF/views
+	
+	# inherited from empty array ?
+	grasp -o "call[callee=#declare].args:nth(0):matches(arr:not(arr! > *))" -r UI/*-ui/src/main/webapp/WEB-INF/views
+
+	# first of parents
+	grasp -o "call[callee=#declare].args:nth(0).elements:head" -r UI/*-ui/src/main/webapp/WEB-INF/views
+
+	# inherited from more then one
+	grasp -o "call[callee=#declare].args:nth(0).elements:nth(1)" -r UI/*-ui/src/main/webapp/WEB-INF/views
+		
+	# inherited from Grid, parent is grid
+	grasp -o "call[callee=#declare].args:nth(0).elements:first:matches(#Grid)" -r UI/*-ui/src/main/webapp/WEB-INF/views
+	
+	# inherited or mixed with grid
+	grasp -o 'call[callee=#declare].args:nth(0)>#Grid' -r UI/*-ui/src/main/webapp/WEB-INF/views | wc -l
+
+	# mixed Grid (does it makes sence ?)
+	grasp -o 'call[callee=#declare].args:nth(0).elements:tail:matches(#Grid)' -r UI/*-ui/src/main/webapp/WEB-INF/views | wc -l
+
 ## exp (Expression)
 
 ## clause (Clause)
@@ -467,52 +533,8 @@ Count number of features (in BDD tests)
 ## func (Function)
 
 
-#### Find dojo.partial functions
-
-dojo.partial with one parameter (strange construction)
-		
-	grasp -e "__.partial(__)" -r UI/*-ui/src/main/webapp/WEB-INF/views/ 2>/dev/null
-		
-#### Find dojo.hitch functions
-
-Hitch with this + other parameters
-
-	grasp -e "__.hitch(this,__,__)" -r .	
-
-Hitch with 3+ params
-	
-	grasp -e '__.hitch(__,__,__,$others)' -r  UI/app-ui/src/main/webapp/WEB-INF/	
-
-Hitch with this and anonymous function as parameter and 3+ params:
-
-	grasp -e '__.hitch(this,function(_$) { _$ },__,$others)' -r  UI/app-ui/src/main/webapp/WEB-INF/		
-		
-	
-#### Find dojo.replace functions
-
-Replace with 3 params, beware flags
-		
-	grasp -e "__.replace(__,__,__)" -r UI/*-ui/src/main/webapp/WEB-INF/views 2>/dev/null	
-
-Replace with inline replacer function	
-
-	grasp -e "__.replace(__,function(__){__})" -r UI/*-ui/src/main/webapp/WEB-INF/views 2>/dev/null
-
-
-#### Find all methods resolveUiCtx/resolveSvcCtx that use string concats as params
-
-	grasp -e "__.resolveUiCtx( __ + __ )" -r UI/*-ui/src/main/webapp/WEB-INF/views/ 2>/dev/null
-
-	grasp -e "__.resolveSvcCtx( __ + __ )" -r UI/*-ui/src/main/webapp/WEB-INF/views/ 
-
-
-#### Concatenation of 2nd and 3rd params (concat string)
-
-	grasp -e 'fn($a,$b,$c)' -R 'fn({{a}}, {{b}} + " " + {{c}})'
-
-	grasp -e 'fn($a,$b,$c)' -R 'fn({{a}}, {{c}}.concat({{b}}))'
-
-
+	# Functions with Attributes Parameters with specific name
+	grasp '(func-dec,func-exp).params:matches(#/Html$/i)'  -r UI/app-ui/src/main/webapp/resources/dijit
 
 
 ## for-loop (ForLoop)
@@ -533,7 +555,23 @@ Replace with inline replacer function
 
 	# loop with single push (sort of map ?)
 	grasp 'loop!.body>*:first-child:last-child>call[callee=(member[prop=#push])]' 
+
+	# files with count of ifs inside loops, removed zero occurrences
+	grasp --no-color --no-bold -c "(for,while,do-while,for-in) if" -r path/to/directory/ | sort -t":" -k2,2n | grep -v ":0$"
+
+	# output of ifs inside loops
+	grasp -s "(for,while,do-while,for-in) if" -r path/to/directory/
+
 # Misc
+
+### Concat strings
+	
+	# Naive (uri building detection)
+	grasp -s 'bi[op=+]:matches([left="/"],[left="?"],[left="#"],[right="/"],[right="?"],[right="#"])' -r misc/grasp/test/
+
+### set, set
+	
+	grasp  -e '{\_$;$w.set(\_$);$w.set(\_$);\_$}' -r path/to/directory/
 
 ## first-child, last-child
 	
@@ -547,5 +585,10 @@ Replace with inline replacer function
 
 ## regex, RegExp
 
+	# literal containing "/"
+	grasp -s 'bi[op=+][left=literal[value~=/^[\/].*/]]' -r misc/grasp/
+
+	# concat of strings containing one of "/","#","?"	
+	grasp -s 'bi[op=+]:matches([left=literal[value~=/[\/#?]/]],[right=literal[value~=/[\/#?]/]])' -r misc/grasp/
 
 [AMD]: https://en.wikipedia.org/wiki/Asynchronous_module_definition
