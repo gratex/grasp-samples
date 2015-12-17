@@ -140,10 +140,24 @@ I do not like these in code, but need to remember why/when we have used this
 	# hard to say, missing semantics
 	grasp -e 'if(__.length){__}else{__}'
 
+
+#### Ternary IF statements
+
+Useless ternary if
+
+	grasp -e "__ ? true : false" -r UI/*-ui/src/main/webapp/WEB-INF/views/ 2>/dev/null
+
+The most commonly used ternary IF form
+
+	grasp -e '$x ? $x : __' -r UI/*-ui/src/main/webapp/WEB-INF/views/ 2>/dev/null
+
+
+
+
 ### If params sorted by occurrences
 	
 	# better output with "more" command instead of "less"
-	grasp -s -o --no-filename --line-number=false "if.test" -r path/to/directory/ | trim | cnt | less	
+	grasp -s -o --no-filename --line-number=false "if.test" | trim | cnt | less	
 
 ## label (LabeledStatement)
 ## break (BreakStatement)
@@ -158,12 +172,20 @@ I do not like these in code, but need to remember why/when we have used this
 ## for (ForStatement)
 ## for-in (ForInStatement)
 
+
+####forIn with single return 
+
+	grasp 'call[callee=member[obj=#df][prop=#forIn]]! if block.body:matches(return)' -- UI/app-ui/src/main/webapp/WEB-INF/views/common/extensions/dgrid/Grid.js
+
+
+
 ### Oneliner for-in
 	
 	grasp -s 'for-in!.body *:first-child:last-child' -r path/to/directory/
 
 	# for in with 'single' push
 	grasp -s 'for-in.body>*:first-child:last-child>call[callee=(member[prop=#push])]' -r path/to/directory/
+
 
 ## debugger (DebuggerStatement)
 
@@ -387,13 +409,37 @@ This demonstrates finding all Mocha test methods
 	# x.it() or it()
 	grasp 'call[callee=(#it, member[prop=#it])]' -r
 
-The later the searches are more specific by adding another constructions
-for example:
+Function or method CALL with specific name and second parameter is function	
+
+	# x.it(__,function(){}) or it(__,function(){})
+	grasp -s  "call[callee=(#it, member[prop=#it])].arguments:nth(1):matches(func-exp)" \
+		-r misc/grasp/test/
+
+Function or method CALL with specific name, second parameter is function and body contains return
+
+	# x.it(__,function(done){ return }) or it(__,function(done){ return }) 
+	grasp -s  "call[callee=(#it, member[prop=#it])]! .arguments:nth(1):matches(func-exp! return).params:first" \
+		-r misc/grasp/test/
+
+Pattern matching  sample for immediately invoked function expression (PREFIX)
+
+	grasp -s "call[callee=#/^gree/]" -r UI/tst-ui/src/main/webapp/WEB-INF/views/training/first-form/grasp-training/Screen.js
+
+Pattern matching  sample for immediately invoked function expression (SUFFIX)
+
+	grasp -s "call[callee=#/Age$/]" -r UI/tst-ui/src/main/webapp/WEB-INF/views/training/first-form/grasp-training/Screen.js
+
 
 #### Extracting first method param
 Test method descriptions (for docs or review)
 
 	grasp -o 'call[callee=(#it, member[prop=#it])].args:nth(0)'
+
+
+#### Find innerHtml without encoding
+
+	grasp -s "call[callee=(obj, [obj=#html][prop=#set])].args:nth(1):not(call[callee=(obj, [obj=(#encHtml, #enc)])])" -r UI/*-ui/src/main/webapp/WEB-INF/views/ 2>/dev/null
+
 
 #### Count method usage per file
 Count number of features (in BDD tests) 
@@ -403,16 +449,45 @@ Count number of features (in BDD tests)
 ### call.arguments
 
 #### Find calls with at least one arguments 
-Find async it(done) methods, that use done syntax
+
+
+
+####Find async it(done) methods, that use done syntax
 
 	# it('stringifies buffer values', function (done) {
 	grasp  'call[callee=(#it, member[prop=#it])].arguments:nth(1):matches(func-exp).params:first'
+
+
+
+####Adding the 4th parameter to 3-parameter calls 
+
+	grasp -i -e 'tsta($a,$b,$c)' -R 'tsta({{a}},{{b}},{{c}},"")' ./tests/web-services/urls.spec.js
+
+####Params order changing
+
+	grasp -i -e 'tsta($a,$b,$c,$d)' -R 'tsta({{a}},{{c}},{{b}},{{d}})' ./tests/web-services/urls.spec.js
+
+
+####Print 2nd and 3rd params (REVIEW: please!)
+
+	grasp -o -s 'call[callee=member[prop=#withWidgets]].arguments:nth(1),call[callee=member[prop=#withWidgets]]' \
+		-R 'XXX:{{.arguments:slice(1,3) | join ";" }}' 2>/dev/null 
+		UI/*-ui/src/main/webapp/WEB-INF/views/ |\
+		grep "XXX:" | sed "s;XXX:;;"
+
+
+####Map(filter) and filter(map)
+
+	grasp -s "call[callee.prop=(#map)].args:first(call[callee.prop=(#filter)])" -r UI/*-ui/src/main/webapp/WEB-INF/views 2>/dev/null
+	grasp -s "call[callee.prop=(#filter)].args:first(call[callee.prop=(#map)])" -r UI/*-ui/src/main/webapp/WEB-INF/views 2>/dev/null
+
 
 
 ### Find parseInt(__,*!number*)
 
 	# TODO: parseInt() number not between x and y
 	grasp 'call[callee=#parseInt]!.arguments:last-child:not(*number*)' -r misc/grasp/
+
 
 
 ## member (MemberExpression)
@@ -457,8 +532,10 @@ Find async it(done) methods, that use done syntax
 
 ## func (Function)
 
+
 	# Functions with Attributes Parameters with specific name
 	grasp '(func-dec,func-exp).params:matches(#/Html$/i)'  -r UI/app-ui/src/main/webapp/resources/dijit
+
 
 ## for-loop (ForLoop)
 
