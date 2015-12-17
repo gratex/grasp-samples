@@ -356,6 +356,17 @@ This demonstrates finding all Mocha test methods
 	# x.it() or it()
 	grasp 'call[callee=(#it, member[prop=#it])]' -r
 
+Function or method CALL with specific name and second parameter is function	
+
+	# x.it(__,function(){}) or it(__,function(){})
+	grasp -s  "call[callee=(#it, member[prop=#it])].arguments:nth(1):matches(func-exp)" \
+		-r misc/grasp/test/
+
+	...and body contains return (somewhere in body)	
+	# x.it(__,function(done){ return }) or it(__,function(done){ return }) 
+	grasp -s  "call[callee=(#it, member[prop=#it])]! .arguments:nth(1):matches(func-exp! return).params:first" \
+		-r misc/grasp/test/
+
 The later the searches are more specific by adding another constructions
 for example:
 
@@ -397,6 +408,39 @@ Find async it(done) methods, that use done syntax
 ## biop (BiOp)
 
 ## func (Function)
+
+
+### Find dojo.partial functions
+
+dojo.partial with one parameter (strange construction)
+		
+	grasp -e "__.partial(__)" -r UI/*-ui/src/main/webapp/WEB-INF/views/ 2>/dev/null
+		
+### Find dojo.hitch functions
+
+Hitch with this + other parameters
+
+	grasp -e "__.hitch(this,__,__)" -r .	
+
+Hitch with 3+ params
+	
+	grasp -e '__.hitch(__,__,__,$others)' -r  UI/app-ui/src/main/webapp/WEB-INF/	
+
+Hitch with this and anonymous function as parameter and 3+ params:
+
+	grasp -e '__.hitch(this,function(_$) { _$ },__,$others)' -r  UI/app-ui/src/main/webapp/WEB-INF/		
+		
+	
+### Find dojo.replace functions
+
+Replace with 3 params, beware flags
+		
+	grasp -e "__.replace(__,__,__)" -r UI/*-ui/src/main/webapp/WEB-INF/views 2>/dev/null	
+
+Replace with inline replacer function	
+
+	grasp -e "__.replace(__,function(__){__})" -r UI/*-ui/src/main/webapp/WEB-INF/views 2>/dev/null
+
 
 ## for-loop (ForLoop)
 
