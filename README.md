@@ -140,7 +140,7 @@ I do not like these in code, but need to remember why/when we have used this
 	# hard to say, missing semantics
 	grasp -e 'if(__.length){__}else{__}'
 
-### Ternary IF statements
+#### Ternary IF statements
 
 Useless ternary if
 
@@ -166,7 +166,7 @@ The most commonly used ternary IF form
 ## for (ForStatement)
 ## for-in (ForInStatement)
 
-forIn with single return 
+####forIn with single return 
 
 	grasp 'call[callee=member[obj=#df][prop=#forIn]]! if block.body:matches(return)' -- UI/app-ui/src/main/webapp/WEB-INF/views/common/extensions/dgrid/Grid.js
 
@@ -414,22 +414,25 @@ Count number of features (in BDD tests)
 ### call.arguments
 
 #### Find calls with at least one arguments 
-Find async it(done) methods, that use done syntax
+
+
+
+####Find async it(done) methods, that use done syntax
 
 	# it('stringifies buffer values', function (done) {
 	grasp  'call[callee=(#it, member[prop=#it])].arguments:nth(1):matches(func-exp).params:first'
 
 
-Adding the 4th parameter to 3-parameter calls 
+####Adding the 4th parameter to 3-parameter calls 
 
 	grasp -i -e 'tsta($a,$b,$c)' -R 'tsta({{a}},{{b}},{{c}},"")' ./tests/web-services/urls.spec.js
 
-Params order changing
+####Params order changing
 
 	grasp -i -e 'tsta($a,$b,$c,$d)' -R 'tsta({{a}},{{c}},{{b}},{{d}})' ./tests/web-services/urls.spec.js
 
 
-Print 2nd and 3rd params (REVIEW: please!)
+####Print 2nd and 3rd params (REVIEW: please!)
 
 	grasp -o -s 'call[callee=member[prop=#withWidgets]].arguments:nth(1),call[callee=member[prop=#withWidgets]]' \
 		-R 'XXX:{{.arguments:slice(1,3) | join ";" }}' 2>/dev/null 
@@ -437,7 +440,7 @@ Print 2nd and 3rd params (REVIEW: please!)
 		grep "XXX:" | sed "s;XXX:;;"
 
 
-Map(filter) and filter(map)
+####Map(filter) and filter(map)
 
 	grasp -s "call[callee.prop=(#map)].args:first(call[callee.prop=(#filter)])" -r UI/*-ui/src/main/webapp/WEB-INF/views 2>/dev/null
 	grasp -s "call[callee.prop=(#filter)].args:first(call[callee.prop=(#map)])" -r UI/*-ui/src/main/webapp/WEB-INF/views 2>/dev/null
@@ -464,13 +467,13 @@ Map(filter) and filter(map)
 ## func (Function)
 
 
-### Find dojo.partial functions
+#### Find dojo.partial functions
 
 dojo.partial with one parameter (strange construction)
 		
 	grasp -e "__.partial(__)" -r UI/*-ui/src/main/webapp/WEB-INF/views/ 2>/dev/null
 		
-### Find dojo.hitch functions
+#### Find dojo.hitch functions
 
 Hitch with this + other parameters
 
@@ -485,7 +488,7 @@ Hitch with this and anonymous function as parameter and 3+ params:
 	grasp -e '__.hitch(this,function(_$) { _$ },__,$others)' -r  UI/app-ui/src/main/webapp/WEB-INF/		
 		
 	
-### Find dojo.replace functions
+#### Find dojo.replace functions
 
 Replace with 3 params, beware flags
 		
@@ -496,14 +499,14 @@ Replace with inline replacer function
 	grasp -e "__.replace(__,function(__){__})" -r UI/*-ui/src/main/webapp/WEB-INF/views 2>/dev/null
 
 
-### Find all methods resolveUiCtx/resolveSvcCtx that use string concats as params
+#### Find all methods resolveUiCtx/resolveSvcCtx that use string concats as params
 
 	grasp -e "__.resolveUiCtx( __ + __ )" -r UI/*-ui/src/main/webapp/WEB-INF/views/ 2>/dev/null
 
 	grasp -e "__.resolveSvcCtx( __ + __ )" -r UI/*-ui/src/main/webapp/WEB-INF/views/ 
 
 
-### Concatenation of 2nd and 3rd params(concat string)
+#### Concatenation of 2nd and 3rd params (concat string)
 
 	grasp -e 'fn($a,$b,$c)' -R 'fn({{a}}, {{b}} + " " + {{c}})'
 
