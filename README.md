@@ -230,8 +230,11 @@ How many variables are declared on the same line ?
 	# var a,b,c,d vs var a, var b, var c style (TODO: improve, multi lines)
 	grasp "var-decs var-dec" -r | cut -d":" -f1,2 | sort | uniq -c
 
-### Names of variables
-can be used to enforce naming conventions, check against 'data dictionary' or simply spell check.
+### var-dec.id
+
+Names of variables, 
+can be used to enforce naming conventions, 
+check against 'data dictionary' or simply spell check.
 
 	grasp -o "var-dec.id"
 
@@ -258,14 +261,20 @@ Finding variables with given name
 	# echo "var x={},y={};" | 
 	grasp 'var-dec[init=obj:not(obj! > prop[key])]' 
 
-	# TODO: array
+	# declaration of arrays
+	grasp 'var-dec[init=arr:not(arr! > *)]'
+	
+	# names of declared arrays variables (check naming conventions)
+	grasp -o 'var-dec[init=arr:not(arr! > *)].id' 
+
+	# TODO: nonempty arrays
 
 ### Function expressions assigned to variable with given name
 
 finding (one of the styles) validation functions
 
 	# var vali*=function(){}
-	grasp 'var-dec[id=#/^vali/][init=func-exp]' 
+	grasp 'var-dec[id=#/^vali/][init=func-exp].id' 
 
 
 	grasp-find-function(){
@@ -344,7 +353,7 @@ Property with a name matching pattern and specified type:
 
 Finding "object[__] = something"
 
-	# TODO: finetune and exclude some patterns
+	# TODO: fine tune and exclude some patterns
 	grasp -e '__[_exp]=__;' -r 
 	
 	grasp -s ' exp-statement assign[left=member[computed=true]]' -r
