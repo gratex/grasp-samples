@@ -391,7 +391,7 @@ Pattern matching  sample for immediately invoked function expression (PREFIX)
 
 Pattern matching  sample for immediately invoked function expression (SUFFIX)
 
-grasp -s "call[callee=#/Age$/]" -r UI/tst-ui/src/main/webapp/WEB-INF/views/training/first-form/grasp-training/Screen.js
+	grasp -s "call[callee=#/Age$/]" -r UI/tst-ui/src/main/webapp/WEB-INF/views/training/first-form/grasp-training/Screen.js
 
 
 #### Extracting first method param
