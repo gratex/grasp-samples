@@ -140,7 +140,10 @@ I do not like these in code, but need to remember why/when we have used this
 	# hard to say, missing semantics
 	grasp -e 'if(__.length){__}else{__}'
 
-
+### If params sorted by occurrences
+	
+	# better output with "more" command instead of "less"
+	grasp -s -o --no-filename --line-number=false "if.test" -r path/to/directory/ | trim | cnt | less	
 
 ## label (LabeledStatement)
 ## break (BreakStatement)
@@ -154,6 +157,14 @@ I do not like these in code, but need to remember why/when we have used this
 ## do-while (DoWhileStatement)
 ## for (ForStatement)
 ## for-in (ForInStatement)
+
+### Oneliner for-in
+	
+	grasp -s 'for-in!.body *:first-child:last-child' -r path/to/directory/
+
+	# for in with 'single' push
+	grasp -s 'for-in.body>*:first-child:last-child>call[callee=(member[prop=#push])]' -r path/to/directory/
+
 ## debugger (DebuggerStatement)
 
 ## func-dec (FunctionDeclaration)
@@ -297,6 +308,17 @@ Property with a name matching pattern and specified type:
 	# empty object literals
 	grasp 'obj:not(obj! > prop[key])'
 
+
+### Computed property names ES6 
+
+Finding "object[__] = something"
+
+	# TODO: finetune and exclude some patterns
+	grasp -e '__[_exp]=__;' -r 
+	
+	grasp -s ' exp-statement assign[left=member[computed=true]]' -r
+
+
 ## seq (SequenceExpression)
 
 ## unary (UnaryExpression)
@@ -320,6 +342,15 @@ Property with a name matching pattern and specified type:
 
 	# typeof used inside ifs
 	grasp "if.test unary[op=typeof]" -r
+	
+	# conditional based on typeof
+	grasp -e 'typeof $X === "function"?$X():$X' -r path/to/directory/
+
+	# typeof "function" (=== or ==)
+	grasp -e 'typeof $X == "function" ' -r path/to/directory/
+	grasp -e 'typeof $X === "function" ' -r path/to/directory/
+	
+	
 	
 ## bi (BinaryExpression)
 ## assign (AssignmentExpression)
@@ -378,6 +409,10 @@ Find async it(done) methods, that use done syntax
 	grasp  'call[callee=(#it, member[prop=#it])].arguments:nth(1):matches(func-exp).params:first'
 
 
+### Find parseInt(__,*!number*)
+
+	# TODO: parseInt() number not between x and y
+	grasp 'call[callee=#parseInt]!.arguments:last-child:not(*number*)' -r misc/grasp/
 
 
 ## member (MemberExpression)
@@ -390,6 +425,30 @@ Find async it(done) methods, that use done syntax
 
 ## dec (Declaration)
 
+	# files using declare, how many components using dojo inheritance do we have ?
+	grasp -w "call[callee=#declare]" -r UI/*-ui/src/main/webapp/WEB-INF/views | wc -l
+	
+	# not inherited from anything
+	grasp -o "call[callee=#declare].args:nth(0):matches(null)" -r UI/*-ui/src/main/webapp/WEB-INF/views
+	
+	# inherited from empty array ?
+	grasp -o "call[callee=#declare].args:nth(0):matches(arr:not(arr! > *))" -r UI/*-ui/src/main/webapp/WEB-INF/views
+
+	# first of parents
+	grasp -o "call[callee=#declare].args:nth(0).elements:head" -r UI/*-ui/src/main/webapp/WEB-INF/views
+
+	# inherited from more then one
+	grasp -o "call[callee=#declare].args:nth(0).elements:nth(1)" -r UI/*-ui/src/main/webapp/WEB-INF/views
+		
+	# inherited from Grid, parent is grid
+	grasp -o "call[callee=#declare].args:nth(0).elements:first:matches(#Grid)" -r UI/*-ui/src/main/webapp/WEB-INF/views
+	
+	# inherited or mixed with grid
+	grasp -o 'call[callee=#declare].args:nth(0)>#Grid' -r UI/*-ui/src/main/webapp/WEB-INF/views | wc -l
+
+	# mixed Grid (does it makes sence ?)
+	grasp -o 'call[callee=#declare].args:nth(0).elements:tail:matches(#Grid)' -r UI/*-ui/src/main/webapp/WEB-INF/views | wc -l
+
 ## exp (Expression)
 
 ## clause (Clause)
@@ -397,6 +456,9 @@ Find async it(done) methods, that use done syntax
 ## biop (BiOp)
 
 ## func (Function)
+
+	# Functions with Attributes Parameters with specific name
+	grasp '(func-dec,func-exp).params:matches(#/Html$/i)'  -r UI/app-ui/src/main/webapp/resources/dijit
 
 ## for-loop (ForLoop)
 
@@ -416,7 +478,23 @@ Find async it(done) methods, that use done syntax
 
 	# loop with single push (sort of map ?)
 	grasp 'loop!.body>*:first-child:last-child>call[callee=(member[prop=#push])]' 
+
+	# files with count of ifs inside loops, removed zero occurrences
+	grasp --no-color --no-bold -c "(for,while,do-while,for-in) if" -r path/to/directory/ | sort -t":" -k2,2n | grep -v ":0$"
+
+	# output of ifs inside loops
+	grasp -s "(for,while,do-while,for-in) if" -r path/to/directory/
+
 # Misc
+
+### Concat strings
+	
+	# Naive (uri building detection)
+	grasp -s 'bi[op=+]:matches([left="/"],[left="?"],[left="#"],[right="/"],[right="?"],[right="#"])' -r misc/grasp/test/
+
+### set, set
+	
+	grasp  -e '{\_$;$w.set(\_$);$w.set(\_$);\_$}' -r path/to/directory/
 
 ## first-child, last-child
 	
@@ -430,5 +508,10 @@ Find async it(done) methods, that use done syntax
 
 ## regex, RegExp
 
+	# literal containing "/"
+	grasp -s 'bi[op=+][left=literal[value~=/^[\/].*/]]' -r misc/grasp/
+
+	# concat of strings containing one of "/","#","?"	
+	grasp -s 'bi[op=+]:matches([left=literal[value~=/[\/#?]/]],[right=literal[value~=/[\/#?]/]])' -r misc/grasp/
 
 [AMD]: https://en.wikipedia.org/wiki/Asynchronous_module_definition
