@@ -140,6 +140,17 @@ I do not like these in code, but need to remember why/when we have used this
 	# hard to say, missing semantics
 	grasp -e 'if(__.length){__}else{__}'
 
+### Ternary IF statements
+
+Useless ternary if
+
+	grasp -e "__ ? true : false" -r UI/*-ui/src/main/webapp/WEB-INF/views/ 2>/dev/null
+
+The most commonly used ternary IF form
+
+	grasp -e '$x ? $x : __' -r UI/*-ui/src/main/webapp/WEB-INF/views/ 2>/dev/null
+
+
 
 
 ## label (LabeledStatement)
@@ -154,6 +165,13 @@ I do not like these in code, but need to remember why/when we have used this
 ## do-while (DoWhileStatement)
 ## for (ForStatement)
 ## for-in (ForInStatement)
+
+### forIn with single return 
+
+	grasp 'call[callee=member[obj=#df][prop=#forIn]]! if block.body:matches(return)' -- UI/app-ui/src/main/webapp/WEB-INF/views/common/extensions/dgrid/Grid.js
+
+
+
 ## debugger (DebuggerStatement)
 
 ## func-dec (FunctionDeclaration)
@@ -362,18 +380,30 @@ Function or method CALL with specific name and second parameter is function
 	grasp -s  "call[callee=(#it, member[prop=#it])].arguments:nth(1):matches(func-exp)" \
 		-r misc/grasp/test/
 
-	...and body contains return (somewhere in body)	
+...and body contains return (somewhere in body)	
 	# x.it(__,function(done){ return }) or it(__,function(done){ return }) 
 	grasp -s  "call[callee=(#it, member[prop=#it])]! .arguments:nth(1):matches(func-exp! return).params:first" \
 		-r misc/grasp/test/
 
-The later the searches are more specific by adding another constructions
-for example:
+Pattern matching  sample for immediately invoked function expression (PREFIX)
+
+	grasp -s "call[callee=#/^gree/]" -r UI/tst-ui/src/main/webapp/WEB-INF/views/training/first-form/grasp-training/Screen.js
+
+Pattern matching  sample for immediately invoked function expression (SUFFIX)
+
+grasp -s "call[callee=#/Age$/]" -r UI/tst-ui/src/main/webapp/WEB-INF/views/training/first-form/grasp-training/Screen.js
+
 
 #### Extracting first method param
 Test method descriptions (for docs or review)
 
 	grasp -o 'call[callee=(#it, member[prop=#it])].args:nth(0)'
+
+
+#### Find innerHtml without encoding
+
+	grasp -s "call[callee=(obj, [obj=#html][prop=#set])].args:nth(1):not(call[callee=(obj, [obj=(#encHtml, #enc)])])" -r UI/*-ui/src/main/webapp/WEB-INF/views/ 2>/dev/null
+
 
 #### Count method usage per file
 Count number of features (in BDD tests) 
@@ -387,8 +417,6 @@ Find async it(done) methods, that use done syntax
 
 	# it('stringifies buffer values', function (done) {
 	grasp  'call[callee=(#it, member[prop=#it])].arguments:nth(1):matches(func-exp).params:first'
-
-
 
 
 ## member (MemberExpression)
@@ -441,6 +469,11 @@ Replace with inline replacer function
 
 	grasp -e "__.replace(__,function(__){__})" -r UI/*-ui/src/main/webapp/WEB-INF/views 2>/dev/null
 
+
+### Find all methods resolveUiCtx/resolveSvcCtx that use string concats as params
+
+	grasp -e "__.resolveUiCtx( __ + __ )" -r UI/*-ui/src/main/webapp/WEB-INF/views/ 2>/dev/null
+	grasp -e "__.resolveSvcCtx( __ + __ )" -r UI/*-ui/src/main/webapp/WEB-INF/views/ 
 
 ## for-loop (ForLoop)
 
