@@ -3,7 +3,7 @@
 This is our collection of various grasp samples.
 Organized by individual syntax constructs, but may be reorganized
 later. 
-It shell give you inspiration on how the grasp 
+It shall give you inspiration on how the grasp 
 (maybe also with other AST based tools). 
 
 Can be used in coding practice checks, QA and refactoring.
