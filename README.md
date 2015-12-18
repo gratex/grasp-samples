@@ -398,6 +398,8 @@ Finding "object[__] = something"
 	# setting value of specific property
 	# dojo validation set by code
 	grasp -e '__.constraints.__=__'
+	# set constraints alternative
+	grasp -e '__.set("constraints", _$)'
 
 ## update (UpdateExpression)
 ## logic (LogicalExpression)
