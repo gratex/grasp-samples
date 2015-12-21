@@ -448,12 +448,23 @@ Function or method CALL with specific name, second parameter is function and bod
 	grasp -s  "call[callee=(#it, member[prop=#it])]! .arguments:nth(1):matches(func-exp! return).params:first" 
 
 
-Find those 'f' in when(x,f) or __.then(f), where 'f' has no return statement inside
+#### Find those 'f' in when(x,f) or __.then(f), where 'f' has no return statement inside
 
 	grasp -s "call[callee=(#when, member[prop=#then])].arguments:last:matches(func-exp).body:not(block! return)"
 
 	grasp -s '(func-exp,func-dec,prop[val=func-exp])!>call[callee=(#when, member[prop=#then])].arguments:last:matches(func-exp).body:not(block! return)'
 
+
+#### Find cookies (dojo) without setting path attribute
+
+	# with
+	grasp -s 'call[callee=(#cookie)].arguments:last:matches(obj).props[key=#path]'
+	
+	# without (negation of the previous)
+	grasp -s 'call[callee=(#cookie)].arguments:last:not(obj! > prop[key=#path])'
+	
+	# without first param, we get signatures with 2 or more params (cookie write)
+	grasp -s 'call[callee=(#cookie)].arguments:tail:last:not(obj!>prop[key=#path])'
 
 #### Extracting first method param
 
