@@ -533,7 +533,8 @@ Property with a name matching pattern and specified type:
 	# copying from one object to another
 	grasp 'assign[left=member][right=member]'
 
-
+	# multiple left-hand assignment
+	grasp -e '__=__=__=__'
 
 
 ## update (UpdateExpression)
