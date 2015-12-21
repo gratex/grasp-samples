@@ -526,6 +526,8 @@ Property with a name matching pattern and specified type:
 	# setting value of specific property
 	# dojo validation set by code
 	grasp -e '__.constraints.__=__'
+	# set constraints alternative
+	grasp -e '__.set("constraints", _$)'
 
 	# copying from one object to another
 	grasp 'assign[left=member][right=member]'
