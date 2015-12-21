@@ -63,12 +63,12 @@ Since s query and e query both have support for more specific literals
 ## block (BlockStatement)
 
 
-### Coding style
+Coding style
 
 	# adding missing curly braces
 	grasp "if.then:not(block)" -R '{{{}}}' -i 
 
-### Empty blocks
+Empty blocks
 
 	grasp 'block:not(block! > *)'
 
@@ -77,12 +77,12 @@ Empty catch blocks
 	# TODO: using catch body ?
 	grasp 'catch>block:not(block! > *)' -r 
 
-### Empty functions
+Empty functions
 
 	# empty function (TODO: s query for other variants)	
 	grasp -e 'function $name(__){}' 
 
-### One Liner blocks
+One Liner blocks
 	
 	# one line if else (useless) why not using && || ?
 	grasp -e 'if(__){ __ }else{ __ }'
@@ -91,7 +91,7 @@ Empty catch blocks
 	# specific one liner blocks (coding horror)
 	grasp -e 'if(__){ return _bool }else{ return _bool }'
 
-### Block containing something
+Block containing something
 
 	block.body:matches
 
@@ -111,7 +111,7 @@ Empty catch blocks
 	grasp -e "__.hitch(__,function() { this.__() })"
 
 
-### Block not containing something
+Block not containing something
 
 	# useless dojo hitch, hitch(this,f) where f is not using this at all
 	grasp "call[callee=member[prop=#hitch]].arguments:nth(1):matches(func-exp).body:not(block! this)" 
@@ -122,7 +122,7 @@ Empty catch blocks
 	grasp 'if:not([else]).consequent:not(block! return)	
 
  	
- #### promise.done
+promise.done
 
 dojo does not have done function on promise see 
 <https://github.com/cujojs/when/blob/master/docs/api.md#promisethen-vs-promisedone>.
