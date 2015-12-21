@@ -272,6 +272,30 @@ Nested ifs
 	grasp 'if:matches(if! block.body:matches((return! true,return! false)))!~(return! true,return! false)' 
 
 ## throw (ThrowStatement)
+
+Throwing strings, mostly not a good idea
+
+	# throw 'error1'
+	grasp 'throw.argument(str)'
+
+Throwing anything else then string
+
+	grasp 'throw.argument:not(str)'
+
+which can be new Error 
+	
+	# throw new Error("whatever");
+	grasp 'throw.argument(new[callee=#Error])' -r
+
+or even call to Error() as function
+
+	# throw Error("whatever");
+	grasp 'throw.argument(call[callee=#Error])'
+
+or something not mentioned yet ?
+
+	grasp 'throw.argument:not(call[callee=#Error],new[callee=#Error],str)' -r
+
 ## try (TryStatement)
 ## while (WhileStatement)
 ## do-while (DoWhileStatement)
