@@ -13,9 +13,18 @@ Any reviews, and more samples are welcomed (Pull Requests please).
 
 Many codes reference dojo APIs as samples, but try to be framework agnostic.
 
+# Forked version of grasp
+
+We are maintaining our own [forked version of grasp](https://github.com/gratex/grasp),
+so if you want our enhancements (not yet merged to upstream)
+npm install from:
+
+	npm install git+https://github.com/gratex/grasp
+
 <!-- 
 curl http://www.graspjs.com/docs/syntax-js/ | cheerio "h3" | prefix "## " 
 -->
+# Syntax Samples
 
 ## program (Program)
 
