@@ -692,7 +692,7 @@ Count number of features (in BDD tests)
 
 
 
-### Find parseInt(__,*!number*)
+#### Find parseInt(__,!10)
 
 	# TODO: parseInt() number not between x and y
 	grasp 'call[callee=#parseInt]!.arguments:last-child:not(10)' 
