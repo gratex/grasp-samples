@@ -84,9 +84,10 @@ Empty functions
 
 One Liner blocks
 	
+	grasp 'block>*:first-child:last-child'
+
 	# one line if else (useless) why not using && || ?
 	grasp -e 'if(__){ __ }else{ __ }'
-
 
 	# specific one liner blocks (coding horror)
 	grasp -e 'if(__){ return _bool }else{ return _bool }'
@@ -95,13 +96,16 @@ Block containing something
 
 	block.body:matches
 
-	# ifs with return in the if block
+ifs with return in the if block
+	
 	grasp 'if:matches(if! block.body:matches(return))' 
 	
-	# ifs with return in the if block followed by return 
+ifs with return in the if block followed by return 
+
 	grasp 'if:matches(if! block.body:matches(return))!~return' 
 
-	# ifs with return in the if block followed immediately by return 
+ifs with return in the if block followed immediately by return 
+	
 	grasp '*!>if:matches(if! block.body:matches(return))+return' -r
 
 	# TODO: ifs without else, with return in the if block followed immediately by return 
