@@ -106,16 +106,40 @@ Empty catch blocks
 
 	# TODO: ifs without else, with return in the if block followed immediately by return 
 
+	# calls only one method, if param number is same, then it is useless 
+	# maybe false positive if the purpose is to change args number
+	grasp -e "__.hitch(__,function() { this.__() })"
+
+
 ### Block not containing something
 
 	# useless dojo hitch, hitch(this,f) where f is not using this at all
 	grasp "call[callee=member[prop=#hitch]].arguments:nth(1):matches(func-exp).body:not(block! this)" 
 
 	# TODO: useless ES bind 
-	
 
-## expatement (ExpressionStatement)
+	# if without else, that has no return inside the if block
+	grasp 'if:not([else]).consequent:not(block! return)	
+
+ 	
+ #### promise.done
+
+dojo does not have done function on promise see 
+<https://github.com/cujojs/when/blob/master/docs/api.md#promisethen-vs-promisedone>.
+This is grasp query for: find those 'f' in codes: when(x,f) or __.then(f),  and 'f' have no return statement inside
+
+	grasp "call[callee=(#when, member[prop=#then])].arguments:last:matches(func-exp).body:not(block! return)"
+	
+	grasp '(func-exp,func-dec,prop[val=func-exp])!>call[callee=(#when, member[prop=#then])].arguments:last:matches(func-exp).body:not(block! return)' 
+
+
+## exp-statement (ExpressionStatement)
+
 ## if (IfStatement)
+
+see also 
+<http://refactoring.com/catalog/recomposeConditional.html>, 
+<https://github.com/gkz/grasp/issues/38#issuecomment-48367777> for interesting patterns and refactorings.
 
 ### Oneliner ifs
 
@@ -148,45 +172,96 @@ I do not like these in code, but need to remember why/when we have used this
 	# no need for else usually, but of course check the code context
 	grasp  'if[else].consequent!>throw'
 
-### if(x.length) checking for length
+### types of tests
+
+	# between
+	grasp -e 'if($x > __ && $x < __){_$}'
+
+	# ifs 'involving number' checks
+	grasp 'if.test!>num' 
+
+	# checking length
+	grasp -e 'if($x && $x.length){_$}' 
 
 	# check if array/string, checks for  non empty array
 	# hard to say, missing semantics
 	grasp -e 'if(__.length){__}else{__}'
 
+### if patterns (typical shapes of ifs)
 
-#### Ternary IF statements
+	# if followed by return;
+	grasp '*! > if + return'
 
-Useless ternary if
+	# if(){...; return} return;
+	grasp '*! > if:matches(if! block.body:matches(return)) + return' 
 
-	grasp -e "__ ? true : false" 
-	# TODO: add refactoring
+	# set propery if not set already, 
+	# TODO: refactor to x || ($x=$y)
+	grasp -e 'if(!$x){$x=$y}' 
 
-The most commonly used ternary IF form
+	# cached property (TODO: other cached, memoized patterns)
+	grasp -e 'if(! $x){$x=__} return $x'
 
-	grasp -e '$x ? $x : __' 
+	# call if exists
+	grasp -e 'if($x){$x()}' 
+	grasp -e '$X && $X()' 
 
 
+	# call if function (TODO: if pattern)
+	grasp -e 'typeof $X === "function"?$X():$X
 
+	## assign if truth-y
+	# TODO: detector for this:
+	if (target._editorRow) {
+		// editor form
+		target = target._editorRow;
+	}
+	
 
-### If params sorted by occurrences
+	## delete if falsy TODO: detector
+	## same as assign if truth-y just with delete
+
+### If params, sorted by occurrences
 	
 	# Top 10 'popular' if statements
 	# TODO: motivation, sample
-	grasp -s -o --no-filename --line-number=false "if.test" | sort | uniq -c | head -n 10
+	grasp -o --no-filename --line-number=false "if.test" | sort | uniq -c | head -n 10
+
+### Nested ifs
+
+	# TODO: refactor to loop 
+	grasp "\
+	(if.consequent, if.alternate, for.body, for-in.body, while.body, do-while.body, switch.cases, try.block, try.finalizer) \
+	(if.consequent, if.alternate, for.body, for-in.body, while.body, do-while.body, switch.cases, try.block, try.finalizer) \
+	(if.consequent, if.alternate, for.body, for-in.body, while.body, do-while.body, switch.cases, try.block, try.finalizer) \
+	(if.consequent, if.alternate, for.body, for-in.body, while.body, do-while.body, switch.cases, try.block, try.finalizer):not(block! \
+	(if.consequent, if.alternate, for.body, for-in.body, while.body, do-while.body, switch.cases, try.block, try.finalizer)) \
+	" 
 
 ## label (LabeledStatement)
 ## break (BreakStatement)
 ## continue (ContinueStatement)
 ## with (WithStatement)
 ## switch (SwitchStatement)
+
 ## return (ReturnStatement)
+
+	# returning true or false
+	grasp '(return! true,return! false)'
+
+	## ifs with return boolean in the if block followed by return of boolean
+	grasp 'if:matches(if! block.body:matches((return! true,return! false)))!~(return! true,return! false)' 
+
 ## throw (ThrowStatement)
 ## try (TryStatement)
 ## while (WhileStatement)
 ## do-while (DoWhileStatement)
 ## for (ForStatement)
 ## for-in (ForInStatement)
+
+	grasp -e '_for_in'
+
+	grasp  'for-in.left'
 
 
 #### forIn with single return 
@@ -196,11 +271,11 @@ The most commonly used ternary IF form
 
 ### Oneliner for-in
 	
-	grasp -s 'for-in!.body *:first-child:last-child' 
+	grasp 'for-in!.body *:first-child:last-child' 
 
 	# for in with 'single' push
 	# TODO: motivation ?
-	grasp -s 'for-in.body>*:first-child:last-child>call[callee=(member[prop=#push])]' 
+	grasp 'for-in.body>*:first-child:last-child>call[callee=(member[prop=#push])]' 
 
 
 ## debugger (DebuggerStatement)
@@ -304,9 +379,31 @@ finding (one of the styles) validation functions
 	grasp -e '__ || []'
 
 
-
 	# empty array
 	grasp 'arr:not(arr! > *)'
+
+	# array.last(), traditional syntax
+	grasp -e '$x[$x.length-1]'
+
+
+	# ensure array r.messages || (r.messages = []);
+	grasp -e '$x || ($x=[])' 					
+	grasp -e '{$x || ($x=[]); $x.push(__);}' 
+
+	# refactor simple dojoArray.map to arrow or lambdas
+	grasp -e '$darray.map($arr,function($x){ return $x.$y;})' \
+		-i -R '{{darray}}.map({{arr}},"return {{x}}.{{y}}")' 
+
+
+	# array normalization (not very nice)
+	# TODO: detector + other patterns
+	if (lang.isArray(items.type)) {
+		items = items.type;
+	} else {
+		items = [
+			items
+		];
+	}	
 
 ## obj (ObjectExpression)
 
@@ -332,17 +429,18 @@ Property with a name matching pattern and specified type:
 	# {vali*: function(){}}
 	grasp 'prop[key=#/^vali/][val=func-exp]' 
 
-
 ## prop (Property)
 
 ### Objects {} that have Property with a certain name:
 
 	grasp 'obj! > prop[key=#columns]'
 
-
 ### Object without property with some name
 
 	grasp 'obj:not(obj! > prop[key=#test])' 
+
+	# dojo cookies, setting cookie without setting path (good idea ?)
+	grasp 'call[callee=(#cookie)].arguments:tail:last:not(obj!>prop[key=#path])'
 
 ### Object with property a but without property b
 
@@ -358,15 +456,9 @@ Property with a name matching pattern and specified type:
 	grasp 'obj:not(obj! > prop[key])'
 
 
-### Computed property names ES6 
-
-Finding "object[__] = something"
-
-	# TODO: fine tune and exclude some patterns
-	grasp -e '__[_exp]=__;' -r 
+### Props but excluding function expressions 
 	
-	grasp -s ' exp-statement assign[left=member[computed=true]]' -r
-
+	grasp 'obj prop[val!=func-exp]'
 
 ## seq (SequenceExpression)
 
@@ -400,7 +492,34 @@ Finding "object[__] = something"
 
 	# Naive (uri building detection)
 	# TODO: nicer
-	grasp -s 'bi[op=+]:matches([left="/"],[left="?"],[left="#"],[right="/"],[right="?"],[right="#"])' 
+	grasp 'bi[op=+]:matches([left="/"],[left="?"],[left="#"],[right="/"],[right="?"],[right="#"])' 
+
+	
+	# binary ops with 1
+	grasp 'bi:matches([left=1],[right=1])'
+	
+	#bi ops with -1 (TODO: do I really need to check negative numbers this way ?)
+	grasp 'bi[right=unary[op=-][argument.value=1]]' 
+	
+	grasp 'bi:matches([left=1],[right=1],[left=unary[op=-][argument.value=1]],[right=unary[op=-][argument.value=1]])' 
+	
+	# comparison operatos (TODO: nicer ?)
+	grasp 'bi:matches([op="=="],[op="==="],[op="!=="],[op="!="],[op=">"],[op=">="],[op="<"],[op="<="])' 
+	
+	# biops with left or right being compare
+	grasp 'bi:matches([left=call[callee=(#compare, member[prop=#compare])]],[right=call[callee=(#compare, member[prop=#compare])]])' 
+	
+	# all combine together:
+	
+	function grasp_compare(){
+		Q_METHOD='[left=call[callee=(#compare, member[prop=#compare])]],[right=call[callee=(#compare, member[prop=#compare])]]'
+		Q_OP='[op="=="],[op="==="],[op="!=="],[op="!="],[op=">"],[op=">="],[op="<"],[op="<="]'
+		Q_VALUE='[left=1],[right=1],[left=unary[op=-][argument=1]],[right=unary[op=-][argument=1]]'
+		Q="bi:matches($Q_OP):matches($Q_VALUE):matches($Q_METHOD)"
+		
+		grasp "$Q" 
+	}
+
 
 ## assign (AssignmentExpression)
 
@@ -408,9 +527,29 @@ Finding "object[__] = something"
 	# dojo validation set by code
 	grasp -e '__.constraints.__=__'
 
+	# copying from one object to another
+	grasp 'assign[left=member][right=member]'
+
+
+
+
 ## update (UpdateExpression)
 ## logic (LogicalExpression)
+
 ## cond (ConditionalExpression)
+
+### property name, defined with conditional
+
+	# o[disabled?"show":"hide"](), call one of the methods based on condition
+	grasp 'member[computed=true][property=cond]' -r
+
+	# refactoring
+	grasp -e '$w[$test?"show":"hide"]()' -i -R '{{w}}.set("hidden", !({{test}}))'  
+
+### Useless ternary if
+
+	grasp -e "__ ? true : false"	
+
 ## new (NewExpression)
 
 Extracting regexps from code, useful for review, DRY, safety, correctness
@@ -426,6 +565,9 @@ Extracting regexps from code, useful for review, DRY, safety, correctness
 	# new RegExp("/test/");
 
 	grasp '*!>new[callee=#RegExp].args:first(String)'
+
+	# dojo, see deferred antipattern
+	grasp -e "new Deferred()"
 
 ## call (CallExpression)
 
@@ -444,13 +586,16 @@ This demonstrates finding all Mocha test methods
 Function or method CALL with specific name and second parameter is function	
 
 	# x.it(__,function(){}) or it(__,function(){})
-	grasp -s  "call[callee=(#it, member[prop=#it])].arguments:nth(1):matches(func-exp)" 
+	grasp "call[callee=(#it, member[prop=#it])].arguments:nth(1):matches(func-exp)" 
 
 Function or method CALL with specific name, second parameter is function and body contains return
 
 	# x.it(__,function(done){ return }) or it(__,function(done){ return }) 
-	grasp -s  "call[callee=(#it, member[prop=#it])]! .arguments:nth(1):matches(func-exp! return).params:first" 
+	grasp "call[callee=(#it, member[prop=#it])]! .arguments:nth(1):matches(func-exp! return).params:first" 
 
+Name of method matches on of specified, but is called on something not matching given name:
+
+	grasp 'call[callee=member[obj=:not(#array,#arayUtil,#darray,#df,call[callee=#query])][prop=(#filter,#map,#forEach,#some,#every,#reduce,#reduceRight)]]'
 
 #### Extracting first method param
 
@@ -462,7 +607,7 @@ Test method descriptions (for docs or review)
 #### Find innerHtml without encoding
 
 	# applies to dojo set.html and our encoder method names
-	grasp -s "call[callee=(obj, [obj=#html][prop=#set])].args:nth(1):not(call[callee=(obj, [obj=(#encHtml, #enc)])])"
+	grasp "call[callee=(obj, [obj=#html][prop=#set])].args:nth(1):not(call[callee=(obj, [obj=(#encHtml, #enc)])])"
 
 
 #### Count method usage per file
@@ -473,9 +618,48 @@ Count number of features (in BDD tests)
 
 ### call.arguments
 
+#### Searching for calls with certain signature
+
+	# dojo hitch signatures
+	grasp -e "__.hitch(this,__,__)" 
+	grasp -e '__.hitch(__,__,__,$others)' 
+	grasp -e '__.hitch(this,function(_$) { _$ },__,$others)' 
+
+	# Replace with 3 params, beware flags
+	grasp -e "__.replace(__,__,__)"
+
+	# Replace with inline replacer function	
+	grasp -e "__.replace(__,function(__){__})"
+
+	# various replace signatures
+	grasp -e '__.replace(_str,_str)'
+	grasp -e '__.replace(_regex,_str)'
+
+	# argument not literal 
+	graps -s "call[callee=#require].args:not(literal)"
+
+	# argument not string 
+	grasp "call[callee=#require].args:not([value=type(String)])"
+	grasp "call[callee=#i18n].args:first:not(literal)"
+
+	# dojo require with one param (TODO: add link to docs)
+	grasp -e "require(__)" -r .
+
+	# selenium promise api (incorrect)
+	grasp -e "promise.all(__,__)" 
+	# selenium promise api (correct)
+	grasp -e "promise.all(__)"
+
+	# dojo setter of specific property
+	grasp -e '__.set(__,"title",__)'
+
+	# indexOf various patterns usage statistics
+	queries="$(cat ./test/indexOf.js | rm-comments | grep "indexOf" | cut -d"=" -f2- | trim | sed "s;str[1];__;g ; s;str[2];_$;g ; s/; *$//" )"
+	while read q; do c=$(grasp -e "$q" -r . | wc -l); echo "$q|$c"; done <<< "$queries" 
+
 #### Find calls with at least one arguments 
 
-	# TODO:
+	# TODO: s query
 
 #### Find async it(done) methods, that use done syntax
 
@@ -490,13 +674,18 @@ Count number of features (in BDD tests)
 
 	grasp -i -e 'tsta($a,$b,$c,$d)' -R 'tsta({{a}},{{c}},{{b}},{{d}})' 
 
+#### 'Collapsing' params
+
+	# get rid of 3rd param, make it part of 2nd param
+	grasp -e 'fn($a,$b,$c)' -R 'fn({{a}}, {{b}} + " " + {{c}})'
+	grasp -e 'fn($a,$b,$c)' -R 'fn({{a}}, {{c}}.concat({{b}}))'
 
 #### Detecting Nested Function Calls 
 
 	# ((())) style
 	# Map(filter) and filter(map) (dojo style)
-	grasp -s "call[callee.prop=(#map)].args:first(call[callee.prop=(#filter)])" 
-	grasp -s "call[callee.prop=(#filter)].args:first(call[callee.prop=(#map)])" 
+	grasp "call[callee.prop=(#map)].args:first(call[callee.prop=(#filter)])" 
+	grasp "call[callee.prop=(#filter)].args:first(call[callee.prop=(#map)])" 
 
 
 
@@ -509,6 +698,17 @@ Count number of features (in BDD tests)
 
 ## member (MemberExpression)
 
+### member.computed 
+	
+	grasp 'member[computed=true]' -r
+
+	# o["y"] = 10; o["y" + name] = 10
+	grasp ' exp-statement assign[left=member[computed=true]]' -r
+
+	# o[disabled?"show":"hide"](), call one of the methods based on condition
+	grasp 'member[computed=true][property=cond]' -r
+
+
 ## switch-case (SwitchCase)
 
 ## catch (CatchClause)
@@ -517,7 +717,95 @@ Count number of features (in BDD tests)
 
 ## dec (Declaration)
 
-dojo style inheritance (declare)
+
+
+## exp (Expression)
+
+## clause (Clause)
+
+## biop (BiOp)
+
+## func (Function)
+
+## for-loop (ForLoop)
+
+	# TODO: for loop without i used inside block {}
+	# modifying for loops, TODO: refactor to while ?
+
+	# for with one child
+	grasp -e 'for(__;__;__){ __ }' 
+	
+	
+	# for with push
+	grasp -e 'for(__;__;__){ __.push(_$) }'
+
+
+## while-loop (WhileLoop)
+
+## loop (Loop)
+
+	# files with many loops 
+	grasp --no-color -c 'loop' -r | grep -v ":0$" | sort -t":" -k2,2nr
+
+	# 'size of loops'
+	grasp --no-color -c 'loop>*' -r | grep -v ":0$" | sort -t":" -k2,2nr
+
+	# number if ifs inside the loop (sort of complexity metrics, but there are better detectors)
+	grasp --no-color -c 'loop if' -r | grep -v ":0$" | sort -t":" -k2,2nr
+
+
+	# loop with single push (sort of map ?)
+	grasp 'loop!.body>*:first-child:last-child>call[callee=(member[prop=#push])]' 
+
+# Misc
+
+## Subsequent calls of the same function
+
+	## TODO: push push vs push
+	## detector for both
+	## see http://jsperf.com/pushpush
+
+	# dojo setters accept objects, no need to call X times
+	grasp  -e '{_$;$w.set(_$);$w.set(_$);_$}'
+
+	# dojo put-selector, use chaining instead ?
+	grasp -e '{var $x=put(__);put($x,__);}'
+
+## Chaining functions
+
+	grasp -e '__.then(_$).then(_$).then(_$)'
+
+	grasp -e '__.replace(_$).replace(_$)'
+
+## Nested function calls
+
+	# nested then (TODO: what is the difference ?)
+	grasp "call[callee=member[prop=#then]].args:first! call[callee=member[prop=#then]]"
+	grasp "call[callee=member[prop=#then]].args:first:matches(func-exp! call[callee=member[prop=#then]])"
+
+	# TODO: explain
+	grasp  "call[callee=(#hitch, member[prop=#hitch])]! .arguments:nth(1):matches(func-exp! call[callee=(#hitch, member[prop=#hitch])])"
+
+## Identity function
+
+	grasp -e 'function __($a){ return $a;}' 
+
+## Cloning objects
+
+Various ways of cloning objects, some of them are useful but some can be avoided (dojo syntax).
+
+	# Clones
+	grasp -e '__.mixin({},$_)' 
+	grasp -e 'whitelistMixin(__,{},$_)'
+	grasp -e 'blacklistMixin(__,{},$_)'
+
+	# TODO: es cloning patterns, more dojo patterns
+
+## toString conversions
+
+	TODO: 
+
+## dojo style inheritance (declare)
 
 	# files using declare, how many components using dojo inheritance do we have ?
 	grasp -w "call[callee=#declare]" -r | wc -l
@@ -543,43 +831,18 @@ dojo style inheritance (declare)
 	# mixed Grid (does it makes sence ?)
 	grasp -o 'call[callee=#declare].args:nth(0).elements:tail:matches(#Grid)' -r | wc -l
 
-## exp (Expression)
+## dojo/_base/config usage 
 
-## clause (Clause)
+	# find all requires defines that require config and use the config
+	grasp -o -s '(*!>call[callee=(#define,#require)].args:first(arr) > "dojo/_base/config").arguments:last member[obj=#config]' 
 
-## biop (BiOp)
+## dojo has(), dojo feature detection and browser sniffing:
 
-## func (Function)
-
-## for-loop (ForLoop)
-
-	# TODO: for loop without i used inside block {}
-	# modifying for loops, TODO: refactor to while ?
-
-## while-loop (WhileLoop)
-
-## loop (Loop)
-
-	# files with many loops 
-	grasp --no-color -c 'loop' -r | grep -v ":0$" | sort -t":" -k2,2nr
-
-	# 'size of loops'
-	grasp --no-color -c 'loop>*' -r | grep -v ":0$" | sort -t":" -k2,2nr
-
-	# number if ifs inside the loop (sort of complexity metrics, but there are better detectors)
-	grasp --no-color -c 'loop if' -r | grep -v ":0$" | sort -t":" -k2,2nr
-
-
-	# loop with single push (sort of map ?)
-	grasp 'loop!.body>*:first-child:last-child>call[callee=(member[prop=#push])]' 
-
-# Misc
-
-### Subsequent calls of the same function
-
-	## TODO: push push vs push
-	## detector for both
-	## see http://jsperf.com/pushpush
+	# calls to has (detectors usage)
+	grasp --no-color --no-bold  -s 'call[callee=#has].args:first' -o -r | cut -d":" -f3 | sort -u
+	
+	# has.add, (detector declarations)
+	grasp --no-color --no-bold  -s 'call[callee=member[obj=#has][prop=#add]].args:first' -o -r | cut -d":" -f3 | sort -u
 
 
 ## first-child, last-child
@@ -592,13 +855,18 @@ dojo style inheritance (declare)
 	# oneliner function
 	grasp -e 'function(_$){__}'
 
+## str
+
+	# dump 'all strings' (omit prop names)
+	grasp --no-filename --no-line-number  -o --no-color --no-bold ':not(prop, member) > str' -r
+
 ## regex, RegExp
 
 	# literal containing "/"
-	grasp -s 'bi[op=+][left=literal[value~=/^[\/].*/]]' 
+	grasp 'bi[op=+][left=literal[value~=/^[\/].*/]]' 
 
 	# concat of strings containing one of "/","#","?"	
-	grasp -s 'bi[op=+]:matches([left=literal[value~=/[\/#?]/]],[right=literal[value~=/[\/#?]/]])' 
+	grasp 'bi[op=+]:matches([left=literal[value~=/[\/#?]/]],[right=literal[value~=/[\/#?]/]])' 
 
 
 ##  --parser   

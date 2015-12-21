@@ -6,3 +6,5 @@ o["y"] = 10;
 
 var name;
 o["y" + name] = 10;
+
+o[disabled?"hide":"show"]();
