@@ -576,6 +576,11 @@ Extracting regexps from code, useful for review, DRY, safety, correctness
 	# Promises, x.then() or when()
 	grasp 'call[callee=(#when, member[prop=#then])]'
 
+
+#### Find more then 3 chained THENs
+
+	grasp -e "__.then(_$).then(_$).then(_$)"
+
 #### Find call of function or method with given name
 
 This demonstrates finding all Mocha test methods
@@ -596,6 +601,24 @@ Function or method CALL with specific name, second parameter is function and bod
 Name of method matches on of specified, but is called on something not matching given name:
 
 	grasp 'call[callee=member[obj=:not(#array,#arayUtil,#darray,#df,call[callee=#query])][prop=(#filter,#map,#forEach,#some,#every,#reduce,#reduceRight)]]'
+
+#### Find those 'f' in when(x,f) or __.then(f), where 'f' has no return statement inside
+
+	grasp -s "call[callee=(#when, member[prop=#then])].arguments:last:matches(func-exp).body:not(block! return)"
+
+	grasp -s '(func-exp,func-dec,prop[val=func-exp])!>call[callee=(#when, member[prop=#then])].arguments:last:matches(func-exp).body:not(block! return)'
+
+
+#### Find cookies (dojo) without setting path attribute
+
+	# with
+	grasp -s 'call[callee=(#cookie)].arguments:last:matches(obj).props[key=#path]'
+	
+	# without (negation of the previous)
+	grasp -s 'call[callee=(#cookie)].arguments:last:not(obj! > prop[key=#path])'
+	
+	# without first param, we get signatures with 2 or more params (cookie write)
+	grasp -s 'call[callee=(#cookie)].arguments:tail:last:not(obj!>prop[key=#path])'
 
 #### Extracting first method param
 
