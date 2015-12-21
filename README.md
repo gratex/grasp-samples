@@ -452,6 +452,8 @@ Find those 'f' in when(x,f) or __.then(f), where 'f' has no return statement ins
 
 	grasp -s "call[callee=(#when, member[prop=#then])].arguments:last:matches(func-exp).body:not(block! return)"
 
+	grasp -s '(func-exp,func-dec,prop[val=func-exp])!>call[callee=(#when, member[prop=#then])].arguments:last:matches(func-exp).body:not(block! return)'
+
 
 #### Extracting first method param
 
