@@ -425,6 +425,11 @@ Extracting regexps from code, useful for review, DRY, safety, correctness
 	# Promises, x.then() or when()
 	grasp 'call[callee=(#when, member[prop=#then])]'
 
+
+#### Find more then 3 chained THENs
+
+	grasp -e "__.then(_$).then(_$).then(_$)"
+
 #### Find call of function or method with given name
 
 This demonstrates finding all Mocha test methods
