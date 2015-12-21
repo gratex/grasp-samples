@@ -92,9 +92,20 @@ One Liner blocks
 	# specific one liner blocks (coding horror)
 	grasp -e 'if(__){ return _bool }else{ return _bool }'
 
+
 Block containing something
 
 	block.body:matches
+
+Block not containing something
+
+	# useless dojo hitch, hitch(this,f) where f is not using this at all
+	grasp "call[callee=member[prop=#hitch]].arguments:nth(1):matches(func-exp).body:not(block! this)" 
+
+	# TODO: useless ES bind 
+
+	# if without else, that has no return inside the if block
+	grasp 'if:not([else]).consequent:not(block! return)	
 
 ifs with return in the if block
 	
@@ -113,18 +124,6 @@ ifs with return in the if block followed immediately by return
 	# calls only one method, if param number is same, then it is useless 
 	# maybe false positive if the purpose is to change args number
 	grasp -e "__.hitch(__,function() { this.__() })"
-
-
-Block not containing something
-
-	# useless dojo hitch, hitch(this,f) where f is not using this at all
-	grasp "call[callee=member[prop=#hitch]].arguments:nth(1):matches(func-exp).body:not(block! this)" 
-
-	# TODO: useless ES bind 
-
-	# if without else, that has no return inside the if block
-	grasp 'if:not([else]).consequent:not(block! return)	
-
  	
 promise.done
 
@@ -145,17 +144,24 @@ see also
 <http://refactoring.com/catalog/recomposeConditional.html>, 
 <https://github.com/gkz/grasp/issues/38#issuecomment-48367777> for interesting patterns and refactorings.
 
-### Oneliner ifs
+Oneliner ifs
 
 	# oneliner ifs shall be refactored
 	grasp -e 'if(__){__}' 
 	grasp -e 'if($x){$y}' -R '{{x}} && ({{y}})' 
 
-### Ifs without else
+Ifs without else
 
 	grasp 'if:not([else])'
 
-### If with single return statements 
+Ifs without else and no return 	
+
+TODO: why is this interesting ? motivation please (basically if that are not quick exits).
+I do not like these in code, but need to remember why/when we have used this
+
+	grasp 'if:not([else]).consequent:not(block! return)'
+
+If with single return statements 
 
 Usually used as quick exit inside functions or loops 
 (in loops it may indicate filter semantics)
@@ -163,20 +169,13 @@ Usually used as quick exit inside functions or loops
 	# TODO: better ? we do not like the first: hack
 	grasp 'if.consequent.body:first(return)'
 
-### Ifs without else and no return 	
-
-TODO: why is this interesting ? motivation please (basically if that are not quick exits).
-I do not like these in code, but need to remember why/when we have used this
-
-	grasp 'if:not([else]).consequent:not(block! return)'
-
-### Useless else
+Useless else
 	
 	# if(){throw}else{...code}, can be if{throw}...code (in most cases)
 	# no need for else usually, but of course check the code context
 	grasp  'if[else].consequent!>throw'
 
-### types of tests
+types of tests
 
 	# between
 	grasp -e 'if($x > __ && $x < __){_$}'
@@ -190,6 +189,23 @@ I do not like these in code, but need to remember why/when we have used this
 	# check if array/string, checks for  non empty array
 	# hard to say, missing semantics
 	grasp -e 'if(__.length){__}else{__}'
+
+If params, sorted by occurrences
+	
+	# Top 10 'popular' if statements
+	# TODO: motivation, sample
+	grasp -o --no-filename --line-number=false "if.test" | sort | uniq -c | head -n 10
+
+Nested ifs
+
+	# TODO: refactor to loop 
+	grasp "\
+	(if.consequent, if.alternate, for.body, for-in.body, while.body, do-while.body, switch.cases, try.block, try.finalizer) \
+	(if.consequent, if.alternate, for.body, for-in.body, while.body, do-while.body, switch.cases, try.block, try.finalizer) \
+	(if.consequent, if.alternate, for.body, for-in.body, while.body, do-while.body, switch.cases, try.block, try.finalizer) \
+	(if.consequent, if.alternate, for.body, for-in.body, while.body, do-while.body, switch.cases, try.block, try.finalizer):not(block! \
+	(if.consequent, if.alternate, for.body, for-in.body, while.body, do-while.body, switch.cases, try.block, try.finalizer)) \
+	" 
 
 ### if patterns (typical shapes of ifs)
 
@@ -225,23 +241,6 @@ I do not like these in code, but need to remember why/when we have used this
 	## delete if falsy TODO: detector
 	## same as assign if truth-y just with delete
 
-### If params, sorted by occurrences
-	
-	# Top 10 'popular' if statements
-	# TODO: motivation, sample
-	grasp -o --no-filename --line-number=false "if.test" | sort | uniq -c | head -n 10
-
-### Nested ifs
-
-	# TODO: refactor to loop 
-	grasp "\
-	(if.consequent, if.alternate, for.body, for-in.body, while.body, do-while.body, switch.cases, try.block, try.finalizer) \
-	(if.consequent, if.alternate, for.body, for-in.body, while.body, do-while.body, switch.cases, try.block, try.finalizer) \
-	(if.consequent, if.alternate, for.body, for-in.body, while.body, do-while.body, switch.cases, try.block, try.finalizer) \
-	(if.consequent, if.alternate, for.body, for-in.body, while.body, do-while.body, switch.cases, try.block, try.finalizer):not(block! \
-	(if.consequent, if.alternate, for.body, for-in.body, while.body, do-while.body, switch.cases, try.block, try.finalizer)) \
-	" 
-
 ## label (LabeledStatement)
 ## break (BreakStatement)
 ## continue (ContinueStatement)
@@ -268,7 +267,7 @@ I do not like these in code, but need to remember why/when we have used this
 	grasp  'for-in.left'
 
 
-#### forIn with single return 
+#### for-in with single return 
 
 	# TODO: motivation ?
 	grasp 'call[callee=member[obj=#df][prop=#forIn]]! if block.body:matches(return)' 
