@@ -45,6 +45,25 @@ to specific files.
 
 ## ident (Identifier)
 
+Pure re-assignments (x=y) style
+
+	grasp assign[left=ident][right=ident]
+
+Capital Case identifiers
+
+	grasp '#/^[A-Z_]+$/' -r
+
+Starts with __ (private convention in some frameworks)
+
+	grasp '#/^__/' -r	
+
+Usage of undefined
+
+	grasp '#undefined' -r
+
+Returns identifier, often indicates procedural style or other smell (may need to review the code):
+	
+	grasp 'return.argument(ident)'	
 
 ## literal (Literal)
 
@@ -53,9 +72,6 @@ Since s query and e query both have support for more specific literals
 
 	# Literals in if statement (not very practical, see num and str)
 	grasp  'if.test!>literal'  
-
-
-
 
 ## empty (EmptyStatement)
 
