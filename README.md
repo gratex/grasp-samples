@@ -566,8 +566,6 @@ dojo style inheritance (declare)
 
 # Misc
 
-	
-
 ### Subsequent calls of the same function
 
 	## TODO: push push vs push
@@ -592,5 +590,28 @@ dojo style inheritance (declare)
 
 	# concat of strings containing one of "/","#","?"	
 	grasp -s 'bi[op=+]:matches([left=literal[value~=/[\/#?]/]],[right=literal[value~=/[\/#?]/]])' 
+
+
+##  --parser   
+
+	
+default parser config is:
+
+	# (acorn, {locations: true, ecmaVersion: 6, sourceType: 'module', allowHashBang: true})
+
+You may need to switch some of the settings, see next chapters.
+
+### --parser sourceType
+
+If you get error like this:
+
+	Error: Could not parse JavaScript from 'mvc\Output.js'. 'with' in strict mode 
+
+Try:
+
+	grasp -W 'program.body > call[callee=(#define,#require)]'  -r \
+		--parser '(acorn, {locations: true, ecmaVersion: 6, sourceType: 'script', allowHashBang: true})'
+
+
 
 [AMD]: https://en.wikipedia.org/wiki/Asynchronous_module_definition
