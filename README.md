@@ -448,6 +448,11 @@ Function or method CALL with specific name, second parameter is function and bod
 	grasp -s  "call[callee=(#it, member[prop=#it])]! .arguments:nth(1):matches(func-exp! return).params:first" 
 
 
+Find those 'f' in when(x,f) or __.then(f), where 'f' has no return statement inside
+
+	grasp -s "call[callee=(#when, member[prop=#then])].arguments:last:matches(func-exp).body:not(block! return)"
+
+
 #### Extracting first method param
 
 Test method descriptions (for docs or review)
