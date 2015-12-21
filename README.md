@@ -75,6 +75,12 @@ Since s query and e query both have support for more specific literals
 
 ## empty (EmptyStatement)
 
+	# e.g for(i=0;i<10;i++);
+	grasp 'for!>for.body(empty)'
+	
+Or better, any loop with empty statement or empty body block
+
+	grasp '*!>loop.body(empty,block:not(block! > *))'
 
 ## block (BlockStatement)
 
