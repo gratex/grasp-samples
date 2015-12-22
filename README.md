@@ -73,6 +73,11 @@ Since s query and e query both have support for more specific literals
 	# Literals in if statement (not very practical, see num and str)
 	grasp  'if.test!>literal'  
 
+### str
+
+	# dump 'all strings' (omit prop names)
+	grasp --no-filename --no-line-number  -o --no-color --no-bold ':not(prop, member) > str' -r
+
 ## empty (EmptyStatement)
 
 	# e.g for(i=0;i<10;i++);
@@ -854,46 +859,6 @@ Various ways of cloning objects, some of them are useful but some can be avoided
 
 	TODO: 
 
-## dojo style inheritance (declare)
-
-	# files using declare, how many components using dojo inheritance do we have ?
-	grasp -w "call[callee=#declare]" -r | wc -l
-	
-	# not inherited from anything
-	grasp -o "call[callee=#declare].args:nth(0):matches(null)"
-	
-	# inherited from empty array ?
-	grasp -o "call[callee=#declare].args:nth(0):matches(arr:not(arr! > *))" 
-
-	# first of parents
-	grasp -o "call[callee=#declare].args:nth(0).elements:head" 
-
-	# inherited from more then one
-	grasp -o "call[callee=#declare].args:nth(0).elements:nth(1)" 
-		
-	# inherited from Grid, parent is grid
-	grasp -o "call[callee=#declare].args:nth(0).elements:first:matches(#Grid)" 
-	
-	# inherited or mixed with grid
-	grasp -o 'call[callee=#declare].args:nth(0)>#Grid' -r | wc -l
-
-	# mixed Grid (does it makes sence ?)
-	grasp -o 'call[callee=#declare].args:nth(0).elements:tail:matches(#Grid)' -r | wc -l
-
-## dojo/_base/config usage 
-
-	# find all requires defines that require config and use the config
-	grasp -o -s '(*!>call[callee=(#define,#require)].args:first(arr) > "dojo/_base/config").arguments:last member[obj=#config]' 
-
-## dojo has(), dojo feature detection and browser sniffing:
-
-	# calls to has (detectors usage)
-	grasp --no-color --no-bold  -s 'call[callee=#has].args:first' -o -r | cut -d":" -f3 | sort -u
-	
-	# has.add, (detector declarations)
-	grasp --no-color --no-bold  -s 'call[callee=member[obj=#has][prop=#add]].args:first' -o -r | cut -d":" -f3 | sort -u
-
-
 ## first-child, last-child
 	
 ### Detect oneliners 
@@ -904,10 +869,7 @@ Various ways of cloning objects, some of them are useful but some can be avoided
 	# oneliner function
 	grasp -e 'function(_$){__}'
 
-## str
 
-	# dump 'all strings' (omit prop names)
-	grasp --no-filename --no-line-number  -o --no-color --no-bold ':not(prop, member) > str' -r
 
 ## regex, RegExp
 
@@ -920,7 +882,6 @@ Various ways of cloning objects, some of them are useful but some can be avoided
 
 ##  --parser   
 
-	
 default parser config is:
 
 	# (acorn, {locations: true, ecmaVersion: 6, sourceType: 'module', allowHashBang: true})
@@ -939,5 +900,69 @@ Try:
 		--parser '(acorn, {locations: true, ecmaVersion: 6, sourceType: 'script', allowHashBang: true})'
 
 
+# dojo framework (specific) samples
 
+## Unit tests
+
+We have lot of unit tests for libs and components (widgets) written in [D.O.H][DOH].
+But some of them are runnable without UI, using node.js.
+To find these test files, use:
+
+	export GLOB_DOH_TESTS= # put some glob here to limit files scope
+	grasp -w -e 'has("host-browser") ||  doh.run()' -r $GLOB_DOH_TESTS
+
+## dojo/_base/config usage 
+
+	# find all requires defines that require config and use the config
+	grasp -o -s '(*!>call[callee=(#define,#require)].args:first(arr) > "dojo/_base/config").arguments:last member[obj=#config]' 
+
+## dojo has(), dojo feature detection and browser sniffing:
+
+calls to has (detectors usage)
+
+	grasp --no-color --no-bold  -s 'call[callee=#has].args:first' -o -r | cut -d":" -f3 | sort -u
+	
+has.add, (detector declarations)
+
+	grasp --no-color --no-bold  -s 'call[callee=member[obj=#has][prop=#add]].args:first' -o -r | cut -d":" -f3 | sort -u
+
+
+
+## dojo style inheritance (declare)
+
+files using declare, how many components using dojo inheritance do we have ?
+
+	grasp -w "call[callee=#declare]" -r | wc -l
+	
+not inherited from anything
+
+	grasp -o "call[callee=#declare].args:nth(0):matches(null)"
+	
+inherited from empty array ?
+
+	grasp -o "call[callee=#declare].args:nth(0):matches(arr:not(arr! > *))" 
+
+first of parents
+
+	grasp -o "call[callee=#declare].args:nth(0).elements:head" 
+
+inherited from more then one
+
+	grasp -o "call[callee=#declare].args:nth(0).elements:nth(1)" 
+		
+inherited from Grid, parent is grid
+
+	grasp -o "call[callee=#declare].args:nth(0).elements:first:matches(#Grid)" 
+	
+inherited or mixed with grid
+
+	grasp -o 'call[callee=#declare].args:nth(0)>#Grid' -r | wc -l
+
+mixed Grid (does it makes sence ?)
+
+	grasp -o 'call[callee=#declare].args:nth(0).elements:tail:matches(#Grid)' -r | wc -l
+
+[DOH]: https://dojotoolkit.org/reference-guide/1.9/util/doh.html
 [AMD]: https://en.wikipedia.org/wiki/Asynchronous_module_definition
+
+
