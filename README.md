@@ -767,6 +767,16 @@ Count number of features (in BDD tests)
 
 ## catch (CatchClause)
 
+check naming conventions for errors:
+
+	grasp -o -s "catch.param" -r | cut -d ":" -f3 | sort | uniq -c
+
+sample output shows inconsistent naming convention:
+
+	    9 e
+	    3 err
+	    8 ex
+
 ## statement (Statement)
 
 ## dec (Declaration)
