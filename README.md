@@ -485,9 +485,22 @@ Property with a name matching pattern and specified type:
 
 ## prop (Property)
 
+### prop.key
+
+Property can be defined as Indetifier or Literal be carefull
+when checking for property 'name'
+
+	key=("test",#test)
+
+	echo 'var x={ test :10}'   | grasp 'prop[key=("test",#test)]'
+	echo 'var x={"test":10}'   | grasp 'prop[key=("test",#test)]'
+
+other samples here use mostly Identifier syntax 
+
 ### Objects {} that have Property with a certain name:
 
 	grasp 'obj! > prop[key=#columns]'
+
 
 ### Object without property with some name
 
