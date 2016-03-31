@@ -73,6 +73,12 @@ Since s query and e query both have support for more specific literals
 	# Literals in if statement (not very practical, see num and str)
 	grasp  'if.test!>literal'  
 
+	# literal containing "/"
+	grasp 'bi[op=+][left=literal[value~=/^[\/].*/]]' 
+
+	# concat of strings containing one of "/","#","?"	
+	grasp 'bi[op=+]:matches([left=literal[value~=/[\/#?]/]],[right=literal[value~=/[\/#?]/]])' 
+
 ### str
 
 	# dump 'all strings' (omit prop names)
@@ -619,20 +625,6 @@ other samples here use mostly Identifier syntax
 
 ## new (NewExpression)
 
-Extracting regexps from code, useful for review, DRY, safety, correctness
-
-	grasp -o 'new[callee=#RegExp].args:first'
-
-	# regexp build from variables, concats (something else then static strings)
-	# are they sanitized ?
-	
-	grasp '*!>new[callee=#RegExp].args:first:not(String)'
-
-	# regexps build from string (useless, use literal form //) 
-	# new RegExp("/test/");
-
-	grasp '*!>new[callee=#RegExp].args:first(String)'
-
 	# dojo, see deferred antipattern
 	grasp -e "new Deferred()"
 
@@ -896,12 +888,21 @@ Various ways of cloning objects, some of them are useful but some can be avoided
 
 ## regex, RegExp
 
-	# literal containing "/"
-	grasp 'bi[op=+][left=literal[value~=/^[\/].*/]]' 
+	
+Extracting regexps from code, useful for review, DRY, safety, correctness
 
-	# concat of strings containing one of "/","#","?"	
-	grasp 'bi[op=+]:matches([left=literal[value~=/[\/#?]/]],[right=literal[value~=/[\/#?]/]])' 
+	grasp -o 'new[callee=#RegExp].args:first'
 
+	# regexp build from variables, concats (something else then static strings)
+	# are they sanitized ?
+	
+	grasp '*!>new[callee=#RegExp].args:first:not(String)'
+
+	# regexps build from string (useless, use literal form //) 
+	# new RegExp("/test/");
+
+	grasp '*!>new[callee=#RegExp].args:first(String)'
+	
 
 ##  --parser   
 
