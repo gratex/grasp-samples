@@ -695,7 +695,7 @@ Count number of features (in BDD tests)
 	grasp -e '__.replace(_regex,_str)'
 
 	# argument not literal 
-	graps -s "call[callee=#require].args:not(literal)"
+	grasp -s "call[callee=#require].args:not(literal)"
 
 	# argument not string 
 	grasp "call[callee=#require].args:not([value=type(String)])"
@@ -826,6 +826,24 @@ sample output shows inconsistent naming convention:
 	# loop with single push (sort of map ?)
 	grasp 'loop!.body>*:first-child:last-child>call[callee=(member[prop=#push])]' 
 
+# Literals 
+
+<http://www.graspjs.com/docs/squery/#Literals>
+
+- 2, 'hi', /re/g, true, null, etc. - matches the specified literal.
+
+- num or Number matches all number literals.
+
+- str or String matches all string literals.
+
+- bool or Boolean matches as boolean literals.
+
+- regex or RegExp matches all regex literals.
+
+- null matches all null literals.
+
+- literal or Literal matches all literals in general
+
 # Misc
 
 ## Subsequent calls of the same function
@@ -923,6 +941,12 @@ Try:
 	grasp -W 'program.body > call[callee=(#define,#require)]'  -r \
 		--parser '(acorn, {locations: true, ecmaVersion: 6, sourceType: 'script', allowHashBang: true})'
 
+# node.js (specific) samples
+
+dynamic require (may be interesting because of browserify and others bundlers)
+
+	# <<< "require(mid)" \
+	grasp -s "call[callee=#require].args:not(str)"
 
 # dojo framework (specific) samples
 
