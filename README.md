@@ -846,6 +846,10 @@ sample output shows inconsistent naming convention:
 
 # Misc
 
+## Comment out all console.log calls
+
+	grasp -e 'console.log(_$)' -R '///{{}}' -i 
+
 ## Subsequent calls of the same function
 
 	## TODO: push push vs push
