@@ -503,6 +503,10 @@ when checking for property 'name'
 
 other samples here use mostly Identifier syntax 
 
+To refactor columns["b"] to columns.b:
+	
+	grasp -e 'columns[_str]' -i -R 'columns.{{_str | str-slice 1, -1 }}'
+
 ### Objects {} that have Property with a certain name:
 
 	grasp 'obj! > prop[key=#columns]'
