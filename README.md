@@ -493,7 +493,7 @@ Property with a name matching pattern and specified type:
 
 ### prop.key
 
-Property can be defined as Indetifier or Literal be carefull
+Property can be defined as Indentifier or Literal be carefull
 when checking for property 'name'
 
 	key=("test",#test)
@@ -503,9 +503,13 @@ when checking for property 'name'
 
 other samples here use mostly Identifier syntax 
 
-To refactor columns["b"] to columns.b:
-	
+Changing property syntax (Literal vs Identifier):
+
+	# To refactor columns["b"] to columns.b (fix JSHint errors)
 	grasp -e 'columns[_str]' -i -R 'columns.{{_str | str-slice 1, -1 }}'
+
+	# To refactor columns.b to columns["b"] (fix 'reserved' keywords)
+	grasp -s "obj.props[key=#b].key" --replace '"b"' -i "$@"
 
 ### Objects {} that have Property with a certain name:
 
@@ -953,12 +957,35 @@ Try:
 	grasp -W 'program.body > call[callee=(#define,#require)]'  -r \
 		--parser '(acorn, {locations: true, ecmaVersion: 6, sourceType: 'script', allowHashBang: true})'
 
+
+## Changing Syntax of Properties
+
+Change syntax from a.enum to a["enum"]
+
+	grasp -s "obj.props[key=#enum].key" --replace '"enum"' -i "$@"
+
+Fixes syntax of 'reserved keywords'
+
+	fix_reserved(){
+		echo "[BUILD]: fix_reserved" 1>&2
+		# Fixes syntax of 'reserved keywords', 
+		# rhino even if es5 still complains about them
+
+		grasp -s "obj.props[key=#enum].key" --replace '"enum"' -i "$@"
+		grasp -s "member[prop=#enum]" --replace '{{.obj}}["enum"]' -i "$@"
+
+		grasp -s "obj.props[key=#default].key" --replace '"default"' -i "$@"
+		grasp -s "member[prop=#default]" --replace '{{.obj}}["default"]' -i "$@"
+	}
+
 # node.js (specific) samples
 
 dynamic require (may be interesting because of browserify and others bundlers)
 
 	# <<< "require(mid)" \
 	grasp -s "call[callee=#require].args:not(str)"
+
+
 
 # dojo framework (specific) samples
 
