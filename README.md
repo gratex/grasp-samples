@@ -525,7 +525,11 @@ To refactor columns["b"] to columns.b:
 	
 	# or
 	grasp 'obj! prop[key=#a]:not(prop[key=#a]!~prop[key=#b])' 
+
+### Object with property with property
 	
+	# echo 'x={o1:{o2:{enum:[1,2,3]}}}', returns o2
+	grasp --no-bold --no-color '(obj > prop! > obj > prop[key=(#enum,#type)]).key'	
 
 ### Empty object literal {}
 
