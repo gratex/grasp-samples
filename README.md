@@ -1061,6 +1061,9 @@ dgrid-* events
 
 	grasp -s 'call[callee=member[prop=#on]].args:nth(0):matches(str[value~=/^dgrid-/])'
 
+multiple events <https://dojotoolkit.org/reference-guide/1.10/dojo/on.html#multiple-events>
+
+	grasp -s 'call[callee=member[prop=#on]].args:nth(0):matches(str[value~=/,/])'
 
 extension events (usage) <https://dojotoolkit.org/reference-guide/1.10/dojo/on.html#extension-events>
 
