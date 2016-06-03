@@ -1043,11 +1043,50 @@ inherited from Grid, parent is grid
 	
 inherited or mixed with grid
 
-	grasp -o 'call[callee=#declare].args:nth(0)>#Grid' -r | wc -l
+	grasp -o 'call[callee=#declare].args:nth(0)>#Grid' -r . | wc -l
 
 mixed Grid (does it makes sence ?)
 
 	grasp -o 'call[callee=#declare].args:nth(0).elements:tail:matches(#Grid)' -r | wc -l
+
+## dojo event handlers
+
+	grasp -e '__.on(_str,_$)'
+
+on("click")
+
+	grasp -s 'call[callee=member[prop=#on]].args:nth(0):matches("click")' 
+
+dgrid-* events
+
+	grasp -s 'call[callee=member[prop=#on]].args:nth(0):matches(str[value~=/^dgrid-/])'
+
+
+extension events (usage) <https://dojotoolkit.org/reference-guide/1.10/dojo/on.html#extension-events>
+
+	grasp -s 'call[callee=member[prop=#on]].args:nth(0):not(str)'
+
+find extension events (impl), very naive:
+
+	grasp -s "return>call[callee=#on]" 
+
+count "event" popularity
+
+	grasp -s -o 'call[callee=member[prop=#on]].args:nth(0)' -r . | cut -d":" -f3 | sort | uniq -c
+
+with sample output:
+
+	    205 eventUtil.refreshCompleteData
+	    189 "click"
+	    168 eventUtil.rowSelectData
+	    105 "dgrid-editor-new-add"
+	     88 "lov-select"
+	     75 eventUtil.rowDeselectData
+	     74 "hide"
+	     72 eventUtil.dataChange
+	     67 "change"
+
+
 
 [DOH]: https://dojotoolkit.org/reference-guide/1.9/util/doh.html
 [AMD]: https://en.wikipedia.org/wiki/Asynchronous_module_definition
