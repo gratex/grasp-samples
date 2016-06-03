@@ -433,6 +433,10 @@ finding (one of the styles) validation functions
 
 ## this (ThisExpression)
 
+
+	 grasp -o -s 'member[obj=this].prop'
+
+
 ## arr (ArrayExpression)
 
 	# normalizing to array
@@ -644,7 +648,13 @@ Changing property syntax (Literal vs Identifier):
 
 ### call.callee, call.member
 
-	# Promises, x.then() or when()
+plain function calls, maches f() but not a.f()
+
+	grasp -s 'call.callee:not(member)'
+
+
+promises, x.then() or when()
+
 	grasp 'call[callee=(#when, member[prop=#then])]'
 
 #### Find call of function or method with given name
@@ -1077,6 +1087,10 @@ count "event" popularity
 
 	grasp -s -o 'call[callee=member[prop=#on]].args:nth(0)' -r . | cut -d":" -f3 | sort | uniq -c
 
+emiting events (get event name only)
+	
+	grasp  -o -s 'call[callee=member[obj=this][prop=#emit]].args:nth(0)'
+
 with sample output:
 
 	    205 eventUtil.refreshCompleteData
@@ -1089,7 +1103,19 @@ with sample output:
 	     72 eventUtil.dataChange
 	     67 "change"
 
+## custom widget getters, setters
 
+<https://dojotoolkit.org/reference-guide/1.10/quickstart/writingWidgets.html#custom-setters-getters>
+
+
+basic syntax:
+
+	grasp -s -o 'call[callee=#declare].args:last.props[key=#/^_set[A-Z].*Attr$/]'
+
+
+Custom setters 'modifying html':
+
+	grasp -s -o 'call[callee=#declare].args:last.props[key=#/^_set/] ! call[callee=member[obj=#html][prop=#set]]'
 
 [DOH]: https://dojotoolkit.org/reference-guide/1.9/util/doh.html
 [AMD]: https://en.wikipedia.org/wiki/Asynchronous_module_definition
