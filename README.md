@@ -361,18 +361,27 @@ or something not mentioned yet ?
 
 ## var-decs (VariableDeclaration)
 
-## var-dec (VariableDeclarator)
+Too many variables assigned in one single var a=0,b=1,c-2,d=3,e=4,f=5; 
 
-### Variables usage
-
-Count of (evil) variables per file
-
-	grasp -c "var-dec" 
+	grasp 'var-decs!>var-dec[init]:nth-child(5)'
 
 How many variables are declared on the same line ?
 	
 	# var a,b,c,d vs var a, var b, var c style (TODO: improve, multi lines)
-	grasp "var-decs var-dec" -r | cut -d":" -f1,2 | sort | uniq -c
+	grasp "var-decs var-dec" -r | cut -d":" -f1,2 | sort | uniq -c	
+
+Refactoring var x,y,z to var x;var y; var z;
+
+	grasp var-decs --replace '{{var-dec | each before, "var " | join ";" }};'
+
+
+## var-dec (VariableDeclarator)
+
+
+Variables usage, Count of (evil) variables per file
+
+	grasp -c "var-dec" 
+
 
 ### var-dec.id
 
@@ -400,7 +409,14 @@ Finding variables with given name
 
 	grasp -o "var-dec[id=#_this]" -r
 
-### Declaring empty object, array
+### var-dec.init
+
+Declarations without init
+
+	# var x,y,z=1; matches x,y
+	grasp 'var-dec:not([init])'
+
+Declaring empty object, array
 
 	# echo "var x={},y={};" | 
 	grasp 'var-dec[init=obj:not(obj! > prop[key])]' 
@@ -413,9 +429,7 @@ Finding variables with given name
 
 	# TODO: nonempty arrays
 
-### Function expressions assigned to variable with given name
-
-finding (one of the styles) validation functions
+Function expressions assigned to variable with given name, finding (one of the styles) validation functions
 
 	# var vali*=function(){}
 	grasp 'var-dec[id=#/^vali/][init=func-exp].id' 
