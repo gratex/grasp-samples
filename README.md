@@ -701,6 +701,17 @@ Count number of features (in BDD tests)
 
 #### Searching for calls with certain signature
 
+	# call with 1 arg (s query is tricky)
+	
+	grasp -e 'declare(__)'
+	grasp -s 'call[callee=#declare]!.args:nth(0):last-child'
+
+	# call with 2 args (s query is tricky)
+	
+	grasp -e 'declare(__,__)'
+	grasp -s 'call[callee=#declare]!.args:nth(1):last-child'
+	
+
 	# dojo hitch signatures
 	grasp -e "__.hitch(this,__,__)" 
 	grasp -e '__.hitch(__,__,__,$others)' 
