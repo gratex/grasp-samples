@@ -223,11 +223,22 @@ types of tests
 	# hard to say, missing semantics
 	grasp -e 'if(__.length){__}else{__}'
 
+	# typeof used inside ifs
+	grasp "if.test unary[op=typeof]" -r
+	
+	# typeof used inside else-if
+	grasp -s '(if!.test unary[op=typeof]).alternate:matches(if).test unary[op=typeof]'
+
 If params, sorted by occurrences
 	
 	# Top 10 'popular' if statements
-	# TODO: motivation, sample
+	# check for style and coding practices used in ifs (long, unreadable, not semantic, ordering , ...)
 	grasp -o --no-filename --line-number=false "if.test" | sort | uniq -c | head -n 10
+
+else if (tests in else if statements)
+
+	grasp -s 'if.alternate:matches(if).test'
+
 
 Nested ifs
 
@@ -584,10 +595,8 @@ Changing property syntax (Literal vs Identifier):
 
 	grasp "return!.arg unary[op=typeof]" 
 
-	# typeof used inside ifs
-	# TODO: motivation ? 
-	grasp "if.test unary[op=typeof]" -r
-	
+
+
 	
 ## bi (BinaryExpression)
 	
