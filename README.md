@@ -562,7 +562,10 @@ Changing property syntax (Literal vs Identifier):
 ### Object with property with property
 	
 	# echo 'x={o1:{o2:{enum:[1,2,3]}}}', returns o2
-	grasp --no-bold --no-color '(obj > prop! > obj > prop[key=(#enum,#type)]).key'	
+	grasp --no-bold --no-color '(obj > prop! > obj > prop[key=(#enum,#type)]).key'
+
+	# echo 'var x={enums:{x:"test", y:{name:"test"}}}' |\
+	grasp "prop[key=#enums].value.properties[value=str].value, prop[key=#enums].value.properties[value=obj].value.properties[key=#name].value"	
 
 ### Empty object literal {}
 
