@@ -479,9 +479,7 @@ Function expressions assigned to variable with given name, finding (one of the s
 	grasp -e '$x || ($x=[])' 					
 	grasp -e '{$x || ($x=[]); $x.push(__);}' 
 
-	# refactor simple dojoArray.map to arrow or lambdas
-	grasp -e '$darray.map($arr,function($x){ return $x.$y;})' \
-		-i -R '{{darray}}.map({{arr}},"return {{x}}.{{y}}")' 
+	
 
 
 	# array normalization (not very nice)
@@ -673,6 +671,20 @@ Changing property syntax (Literal vs Identifier):
 ## call (CallExpression)
 
 ### call.callee, call.member
+
+method call x.y() (array.forEach)
+	
+	grasp -e 'array.forEach(_$)'
+	grasp -s 'call[callee=member[obj=#array][prop=#forEach]]' 
+
+method calls x.*()
+
+	grasp -e 'array.$method(_$)'	
+	grasp -s 'call[callee=member[obj=#array][prop=*]]'
+
+method calls array.*, or darray.* 
+
+	 grasp -s 'call[callee=member[obj=(#array,#darray)][prop=(#filter,#map,#forEach,#some,#every)]]'
 
 plain function calls, maches f() but not a.f()
 
@@ -1153,6 +1165,14 @@ basic syntax:
 Custom setters 'modifying html':
 
 	grasp -s -o 'call[callee=#declare].args:last.props[key=#/^_set/] ! call[callee=member[obj=#html][prop=#set]]'
+
+Dojo array comprehensions and lambdas
+
+	 grasp -s 'call[callee=member[obj=(#array,#darray)][prop=(#filter,#map,#forEach,#some,#every)]].args:nth(1):matches(str)'
+
+	 # refactor simple dojoArray.map to arrow or lambdas
+	 grasp -e '$darray.map($arr,function($x){ return $x.$y;})' \
+		-i -R '{{darray}}.map({{arr}},"return {{x}}.{{y}}")' 
 
 [DOH]: https://dojotoolkit.org/reference-guide/1.9/util/doh.html
 [AMD]: https://en.wikipedia.org/wiki/Asynchronous_module_definition
