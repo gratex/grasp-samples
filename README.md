@@ -76,6 +76,9 @@ Since s query and e query both have support for more specific literals
 	# literal containing "/"
 	grasp 'bi[op=+][left=literal[value~=/^[\/].*/]]' 
 
+	# concat of string with anything (almost always eval, use parametrized strings of builders)
+	grasp 'bi[op=+]:matches([left=str],[right=str])'
+
 	# concat of strings containing one of "/","#","?"	
 	grasp 'bi[op=+]:matches([left=literal[value~=/[\/#?]/]],[right=literal[value~=/[\/#?]/]])' 
 
