@@ -1155,6 +1155,12 @@ with sample output:
 	     72 eventUtil.dataChange
 	     67 "change"
 
+## Extending _Widget
+
+<https://dojotoolkit.org/reference-guide/1.7/dojo/extend.html#extending-widget>
+
+	grasp -s -o 'call[callee=member[prop=#extend]].callee'
+
 ## custom widget getters, setters
 
 <https://dojotoolkit.org/reference-guide/1.10/quickstart/writingWidgets.html#custom-setters-getters>
