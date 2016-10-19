@@ -1192,6 +1192,10 @@ constraints.pattern (formatters)
 
 	grasp --no-multiline-separator --no-bold --no-color -o 'obj.props[key=#pattern])'
 
+dojo ready usage <https://dojotoolkit.org/reference-guide/1.10/dojo/ready.html>, who uses it with what priority ? debugging and makeing decisions about your number in ready:
+
+	grasp -o -s 'call[callee=#ready].args:first'
+
 [DOH]: https://dojotoolkit.org/reference-guide/1.9/util/doh.html
 [AMD]: https://en.wikipedia.org/wiki/Asynchronous_module_definition
 
