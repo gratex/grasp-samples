@@ -1047,7 +1047,9 @@ dynamic require (may be interesting because of browserify and others bundlers)
 	# <<< "require(mid)" \
 	grasp -s "call[callee=#require].args:not(str)"
 
+finding all asserts (texts)
 
+	grasp "call[callee=(#assert)].arguments:last:matches(str,TemplateLiteral)" 
 
 # dojo framework (specific) samples
 
