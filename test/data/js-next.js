@@ -1,3 +1,7 @@
+var x=`test`;
+
+var y=`test${x}test${y}`;
+
 class Rectangle {
   
 }

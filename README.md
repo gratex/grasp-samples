@@ -363,6 +363,8 @@ or something not mentioned yet ?
 	# functions with parameters with specific name pattern
 	grasp '(func-dec,func-exp).params:matches(#/Html$/i)'  
 
+	# functions without parameters (zero params)
+	grasp 'func-dec:not(func-dec!.params)' -r test
 
 ## func-exp (FunctionExpression)
 
@@ -1215,4 +1217,11 @@ not inherited
 
 	grasp 'ClassDeclaration:not([superClass])' -r test
 
-	
+ES2015 specification, Template Literals
+
+	grasp 'TemplateLiteral' -r test
+
+useless template literals without any expressions (zero expressions)
+
+	grasp 'TemplateLiteral:not(TemplateLiteral!.expressions)' -r test
+
