@@ -1201,4 +1201,18 @@ dojo ready usage <https://dojotoolkit.org/reference-guide/1.10/dojo/ready.html>,
 [DOH]: https://dojotoolkit.org/reference-guide/1.9/util/doh.html
 [AMD]: https://en.wikipedia.org/wiki/Asynchronous_module_definition
 
+# ES.Next
 
+ECMAScript 2015, Classes, do we really want to use classes ? Some people do:
+
+	grasp "ClassDeclaration" -r ./test
+
+inherited from something
+
+	grasp 'ClassDeclaration!.superClass' -r test
+
+not inherited 
+
+	grasp 'ClassDeclaration:not([superClass])' -r test
+
+	
