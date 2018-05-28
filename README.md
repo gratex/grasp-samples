@@ -1053,6 +1053,11 @@ finding all asserts (texts)
 
 	grasp "call[callee=(#assert)].arguments:last:matches(str,TemplateLiteral)" 
 
+readFileSync and other Sync function usage:
+	
+	grasp -s 'call[callee=(#/Sync/, member[prop=#/Sync/])]'
+
+
 # dojo framework (specific) samples
 
 ## Unit tests
