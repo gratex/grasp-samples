@@ -1010,6 +1010,15 @@ default parser config is:
 
 You may need to switch some of the settings, see next chapters.
 
+### running with 'other' acorn
+
+'Our' grasp comes with outdated acorn, and new one comes with flow parser.
+To use updated version of acorn (with ES2016 support), 
+specify path relative to grasp:
+
+	grasp -e 'isFinite(__)' --parser='(../../acorn/dist/acorn.js,{locations: true, ecmaVersion: 9, sourceType: 'module', allowHashBang: true})' -r ../node/lib
+
+
 ### --parser sourceType
 
 If you get error like this:
@@ -1020,6 +1029,7 @@ Try:
 
 	grasp -W 'program.body > call[callee=(#define,#require)]'  -r \
 		--parser '(acorn, {locations: true, ecmaVersion: 6, sourceType: 'script', allowHashBang: true})'
+
 
 
 ## Changing Syntax of Properties
