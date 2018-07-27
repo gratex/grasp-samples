@@ -337,8 +337,25 @@ or something not mentioned yet ?
 
 	grasp  'for-in.left'
 
+### for-in with/without and var, let etc...
+	
+	# for (var key in signals)	
+	grasp -s 'for-in.left:matches(var-decs)' 
 
-#### for-in with single return 
+	# for (key in headers)
+	grasp -s 'for-in.left:not(var-decs)' 
+
+	# with let
+	grasp -s 'for-in.left:matches(var-decs[kind=let])' <<< 'for(let k in o){}'
+
+### for-in vs Object.entries
+
+	 # why not using Object.entries ?
+	 # TODO: -s query, more generic please
+	  
+	 grasp -e 'for(var $k in $o){_$;var $v=$o[$k];_$}' <<< 'for(var k in o){x;var v=o[k];y}'
+
+### for-in with single return 
 
 	# TODO: motivation ?
 	grasp 'call[callee=member[obj=#df][prop=#forIn]]! if block.body:matches(return)' 
