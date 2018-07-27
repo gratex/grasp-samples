@@ -351,9 +351,21 @@ or something not mentioned yet ?
 ### for-in vs Object.entries
 
 	 # why not using Object.entries ?
-	 # TODO: -s query, more generic please
-	  
+	 # with -e query but this is quite exact usage
 	 grasp -e 'for(var $k in $o){_$;var $v=$o[$k];_$}' <<< 'for(var k in o){x;var v=o[k];y}'
+
+	 # with squery we can be more lax
+	 # TODO: but this is too lax, need to match o[k]
+	 # but this will match any y=foo[bar]
+
+	 grasp 'for-in! var-dec[init=member[computed=true]],for-in! assign[left=ident][right=member[computed=true]]'  \
+	 <<< 'for(let k in o){foo();v=o[k];bar()}'
+
+	 # we want to detect these typical (anti) samples:
+	 for (key in headers) {
+	 	const entry = headers[key];
+	 	processHeader(this, state, entry[0], entry[1], false);
+	 }
 
 ### for-in with single return 
 
@@ -657,6 +669,19 @@ Changing property syntax (Literal vs Identifier):
 
 
 ## assign (AssignmentExpression)
+	
+	
+
+	# assign to identified with this syntax: x=p[k];
+	grasp 'assign[left=ident][right=member[computed=true]]' <<< "x=p[k];x=p.k"
+
+ 
+	# assign to identified with this syntax: x=p.k;
+	grasp 'assign[left=ident][right=member[computed=false]]' <<< "x=p[k];x=p.k"
+
+	# var x=; and x= is not the same, must grasp for both
+	grasp 'var-dec[init=member[computed=true]],assign[left=ident][right=member[computed=true]]'  \
+	<<< 'var v=o[k];w=o[k]'
 
 	# setting value of specific property
 	# dojo validation set by code
@@ -664,9 +689,6 @@ Changing property syntax (Literal vs Identifier):
 
 	# copying from one object to another
 	grasp 'assign[left=member][right=member]'
-
-
-
 
 ## update (UpdateExpression)
 ## logic (LogicalExpression)
