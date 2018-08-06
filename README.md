@@ -229,6 +229,9 @@ types of tests
 	# typeof used inside ifs
 	grasp "if.test unary[op=typeof]" -r
 	
+	# if(typeof) and throw
+	grasp -s 'if[test=* unary[op=typeof]]! throw' -r ../node/lib/
+
 	# typeof used inside else-if
 	grasp -s '(if!.test unary[op=typeof]).alternate:matches(if).test unary[op=typeof]'
 
@@ -261,6 +264,12 @@ Nested ifs
 	" 
 
 ### if patterns (typical shapes of ifs)
+	
+	# if() throw;  (without {})
+	grasp -s 'if[test][consequent=throw]'
+
+	# ifs with any throws inside
+	grasp -s 'if! throw' -r ../node/lib/
 
 	# if followed by return;
 	grasp '*! > if + return'
