@@ -232,6 +232,12 @@ types of tests
 	# typeof used inside else-if
 	grasp -s '(if!.test unary[op=typeof]).alternate:matches(if).test unary[op=typeof]'
 
+	# typeof v = "number", "number" = typeof v (TODO: verify, may have false positives)
+	grasp -s "
+		bi([left='number'],[right='number'])
+		([right=unary[op=typeof]],[left=unary[op=typeof]])
+	"
+
 If params, sorted by occurrences
 	
 	# Top 10 'popular' if statements
