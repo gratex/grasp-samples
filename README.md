@@ -1102,6 +1102,13 @@ finding all asserts (texts)
 
 	grasp "call[callee=(#assert)].arguments:last:matches(str,TemplateLiteral)" 
 
+refactoring assert to assert.equal
+
+	grasp 
+		-s 'call[callee=#assert]! bi[op="=="][right=literal]' \
+		-R 'assert.equal({{bi.left}}, {{bi.right}})' \
+		<<< "assert(a==2)"
+
 readFileSync and other Sync function usage:
 	
 	grasp -s 'call[callee=(#/Sync/, member[prop=#/Sync/])]'
