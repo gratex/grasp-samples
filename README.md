@@ -897,6 +897,9 @@ Count number of features (in BDD tests)
 	# o[disabled?"show":"hide"](), call one of the methods based on condition
 	grasp 'member[computed=true][property=cond]' -r
 
+	# find method, but not method call
+	grasp -s '*:not(call)!>member[prop=#pop]' <<< 'arr.pop()' # not match
+	grasp -s '*:not(call)!>member[prop=#pop]' <<< 'if(arr.pop)' # match
 
 ## switch-case (SwitchCase)
 
