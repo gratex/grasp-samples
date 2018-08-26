@@ -1304,3 +1304,8 @@ useless template literals without any expressions (zero expressions)
 
 	grasp 'TemplateLiteral:not(TemplateLiteral!.expressions)' -r test
 
+default parameters:
+
+	grasp '*.params:matches(AssignmentPattern)'
+
+	
