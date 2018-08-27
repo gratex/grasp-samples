@@ -410,6 +410,10 @@ or something not mentioned yet ?
 	# functions without parameters (zero params)
 	grasp 'func-dec:not(func-dec!.params)' -r test
 
+### function defined in another function
+	
+	grasp '(func-dec,func-exp,arrow)! (func-dec,func-exp,arrow)'
+
 ## func-exp (FunctionExpression)
 
 	# event handlers declared on dojo widget 
@@ -1308,4 +1312,18 @@ default parameters:
 
 	grasp '*.params:matches(AssignmentPattern)'
 
+rest parameter 
+
+	# any
+	grasp '*.params(RestElement)'
+
+	# rest parameter (only one)
+	grasp '*.params:first(RestElement)'
+
+arrow functions using this
+
+	grasp 'arrow! this'
+
+arrow functions without this
 	
+	grasp 'arrow:not(arrow! this)'	
