@@ -317,6 +317,10 @@ Nested ifs
 	## ifs with return boolean in the if block followed by return of boolean
 	grasp 'if:matches(if! block.body:matches((return! true,return! false)))!~(return! true,return! false)' 
 
+### returning inlined function or arrow function 
+
+	grasp 'return>(arrow,func-exp)'
+
 ## throw (ThrowStatement)
 
 Throwing strings, mostly not a good idea
@@ -1119,6 +1123,10 @@ dynamic require (may be interesting because of browserify and others bundlers)
 
 	# <<< "require(mid)" \
 	grasp -s "call[callee=#require].args:not(str)"
+
+require inside function (not on top level)
+
+	grasp -s '(func-dec,func-exp,arrow) call[callee=#require]'
 
 finding all asserts (texts)
 
