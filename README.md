@@ -1335,3 +1335,7 @@ arrow functions using this
 arrow functions without this
 	
 	grasp 'arrow:not(arrow! this)'	
+
+arrow functions using arguments (from parent function)
+
+	grasp 'ArrowFunctionExpression! #arguments'	
