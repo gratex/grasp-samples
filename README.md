@@ -87,6 +87,11 @@ Since s query and e query both have support for more specific literals
 	# dump 'all strings' (omit prop names)
 	grasp --no-filename --no-line-number  -o --no-color --no-bold ':not(prop, member) > str' -r
 
+	# strings containing two backslashes, \\, unescaping sysntax, 
+	# maybe use String.raw instead ?
+	
+	grasp -s 'str[value~=/\\/]' 
+
 ## empty (EmptyStatement)
 
 	# e.g for(i=0;i<10;i++);
