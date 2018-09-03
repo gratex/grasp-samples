@@ -226,6 +226,7 @@ types of tests
 
 	# checking length
 	grasp -e 'if($x && $x.length){_$}' 
+	grasp -s '*[test=member[prop=#length]].test' #includes also ternary
 
 	# check if array/string, checks for  non empty array
 	# hard to say, missing semantics
