@@ -412,6 +412,16 @@ or something not mentioned yet ?
 
 ## func-dec (FunctionDeclaration)
 
+### constructors
+
+	# functions starting with Capitals
+	grasp 'func-dec[id=#/^[A-Z]/]'
+	# including expressions ,var-dec[id=#/^[A-Z]/][init=*:matches(arrow,func-exp)])'
+	grasp 'func-dec[id=#/^[A-Z]/]'
+
+	# Custom Constructor Pattern
+	grasp 'func-dec[id=#/^[A-Z]/].body!>return' 
+
 ### func-dec.params
 	
 	# functions with parameters with specific name pattern
