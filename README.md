@@ -1159,6 +1159,10 @@ readFileSync and other Sync function usage:
 	
 	grasp -s 'call[callee=(#/Sync/, member[prop=#/Sync/])]'
 
+Excluding minified files from grasping
+	
+	# uses minimatch pattern
+	grasp -e "module.exports" --exclude="**/*.bundle.js,**/*.min.js" ./node_modules
 
 # dojo framework (specific) samples
 
