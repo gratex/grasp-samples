@@ -531,8 +531,18 @@ Function expressions assigned to variable with given name, finding (one of the s
 
 ## this (ThisExpression)
 
+members (props and method names) used in 
+this.XXX or this[XXX] constructions
 
-	 grasp -o -s 'member[obj=this].prop'
+	grasp -o -s 'member[obj=this].prop'
+
+functions without this
+
+	 grasp "func-dec! this" 
+
+functions/methods without this
+
+  	grasp "func-dec:not(func-dec! this)" 
 
 
 ## arr (ArrayExpression)
