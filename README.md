@@ -544,6 +544,12 @@ functions/methods without this
 
   	grasp "func-dec:not(func-dec! this)" 
 
+impure functions, "non methods" without return
+
+	grasp 'func-dec:not(func-dec! return):not(funct-dec! this)'
+
+	# impure arrows ?, TODO: better method detection
+	grasp  'arrow:not(arrow! return):not(arrow! this)' 
 
 ## arr (ArrayExpression)
 
