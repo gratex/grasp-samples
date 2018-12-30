@@ -1375,3 +1375,8 @@ arrow functions without this
 arrow functions using arguments (from parent function)
 
 	grasp 'ArrowFunctionExpression! #arguments'	
+
+arrow functions with useless return and block
+
+	grasp 'arrow (arrow!>block>return:first-child)' ./test/data/arrows.js
+
