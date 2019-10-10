@@ -607,7 +607,14 @@ Property with a name matching pattern and specified type:
 
 ## prop (Property)
 
-### prop.key
+### prop[kind]
+
+Find getter setter properties	
+
+	grasp "prop[kind=get]" 
+    grasp "prop[kind=set]"
+
+### prop[key]
 
 Property can be defined as Indentifier or Literal be carefull
 when checking for property 'name'
