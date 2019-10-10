@@ -614,6 +614,17 @@ Find getter setter properties
 	grasp "prop[kind=get]" 
     grasp "prop[kind=set]"
 
+For properties defined with defineProperty use this:
+	
+	 grasp 'call[callee=member[obj=#Object][prop=#defineProperty]].arguments:nth(2):matches(obj!>prop[key=#get])'
+
+	 grasp 'call[callee=member[obj=#Object][prop=#defineProperty]].arguments:nth(2):matches(obj!>prop[key=#set])'    
+
+For properties defined with defineProperties use this:
+
+	grasp 'call[callee=member[obj=#Object][prop=#defineProperties]].arguments:nth(1):matches(obj! > prop > obj>prop[key=#get])' 
+	grasp 'call[callee=member[obj=#Object][prop=#defineProperties]].arguments:nth(1)>prop!>obj>prop[key=#get]' 
+
 ### prop[key]
 
 Property can be defined as Indentifier or Literal be carefull
