@@ -959,6 +959,18 @@ Count number of features (in BDD tests)
 	grasp -s '*:not(call)!>member[prop=#pop]' <<< 'arr.pop()' # not match
 	grasp -s '*:not(call)!>member[prop=#pop]' <<< 'if(arr.pop)' # match
 
+#### accessing array item by index
+
+	# a[1],a[0] etc...
+	grasp 'member[computed=true].prop[value=type(Number)]' < test/data/arrays.js
+
+	# a[i], a[j]
+	grasp 'member[computed=true].prop[&type=Identifier]'
+
+	# functions containing hardcoded a[0],a[1] etc...
+
+	grasp '(func-dec,func-exp,arrow)! member[computed=true].prop[value=type(Number)]' < test/data/arrays.js
+
 ## switch-case (SwitchCase)
 
 ## catch (CatchClause)
