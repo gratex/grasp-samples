@@ -7,14 +7,17 @@ let o = {};
 let y = o["1"];
 
 const old = (arr) => arr[0] + arr[1];
-const moderd = ([name, surname]) => name + surname;
+const modern = ([name, surname]) => name + surname;
 
-function oldf(arr){
+function modern2([name, surname]) { return name + surname };
+
+function oldf(arr) {
   arr[0] + arr[1];
 }
-const oldE=function oldf(arr){
+const oldE = function oldf(arr) {
   arr[0] + arr[1];
 }
+
 /*
 "init": {
 ,
@@ -41,4 +44,6 @@ const oldE=function oldf(arr){
 }
 }
 ]
+
+
 */

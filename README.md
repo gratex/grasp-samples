@@ -971,6 +971,10 @@ Count number of features (in BDD tests)
 
 	grasp '(func-dec,func-exp,arrow)! member[computed=true].prop[value=type(Number)]' < test/data/arrays.js
 
+	# functions using array destructuring instead
+
+	grasp '(func-dec,func-exp,arrow).params[&type=ArrayPattern]' < test/data/arrays.js
+
 ## switch-case (SwitchCase)
 
 ## catch (CatchClause)
