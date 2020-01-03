@@ -989,11 +989,22 @@ sample output shows inconsistent naming convention:
 	    3 err
 	    8 ex
 
+## import-dec (ImportDeclaration)
+
+Test match the source of an import declaration and then select the provided specifier.
+
+	# import { logger } from 'common/util/logger'
+	grasp 'import-dec[source.value~=/util/] > import-specifier[local=#logger]'
+
+## import-specifier (ImportSpecifier)
+
+## import-default-specifier (ImportDefaultSpecifier)
+
+## import-namespace-specifier (ImportNamespaceSpecifier)
+
 ## statement (Statement)
 
 ## dec (Declaration)
-
-
 
 ## exp (Expression)
 
