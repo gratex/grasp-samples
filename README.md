@@ -7,7 +7,7 @@ It shall give you inspiration on how the grasp
 (maybe also with other AST based tools). 
 
 Can be used in coding practice checks, QA and refactoring.
-See also [anti-babel]() for specific refactoring samples.
+See also [anti-babel](https://github.com/gratex/anti-babel) for specific refactoring samples.
 
 Any reviews, and more samples are welcomed (Pull Requests please).
 
@@ -1413,4 +1413,26 @@ arrow functions using arguments (from parent function)
 arrow functions with useless return and block
 
 	grasp 'arrow (arrow!>block>return:first-child)' ./test/data/arrows.js
+
+async function declaration
+	
+	# not working with standard grasp, use our fork
+
+	grasp -s 'func-dec[async=true]'  
+	grasp -s 'func-dec[async=false]'  
+
+prefix each function with async
+
+	grasp -s '(FunctionDeclaration,FunctionExpression,ArrowFunctionExpression)[async=true]' -R 'async {{}}'  
+
+prefix non async funcions with async if they call f2()
+
+	grasp '(func-dec,func-exp,arrow)[async=false]! call[callee=(#f2, member[prop=#f2])]' ./test/data/refactor-sync.js -R 'async {{}}'
+
+prefix non await calls of f2 with await
+
+	 grasp '(func-dec,func-exp,arrow)[async=true] *>call[callee=(#f2, member[prop=#f2])]' ./test/data/await.js -R 'await {{}}'
+
+combine the two above as seqence and you have async refactor	
+
 
