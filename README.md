@@ -184,6 +184,9 @@ This is grasp query for: find those 'f' in codes: when(x,f) or __.then(f),  and 
 
 ## exp-statement (ExpressionStatement)
 
+	# o["y"] = 10; o["y" + name] = 10
+	grasp ' exp-statement assign[left=member[computed=true]]' -r
+
 ## if (IfStatement)
 
 see also 
@@ -454,8 +457,13 @@ see [IIFE](https://developer.mozilla.org/en-US/docs/Glossary/IIFE), and Self-Exe
 
 	grasp -s "call[callee=func-exp]" . -r
 
-	#TODO: other patterns, IIFE module pattern ...
+	# grasp already has iife in systax, equivalent to:
+	call[callee=(func-exp, member[obj=func-exp][prop=(#call, #apply)])]
 
+	grasp -s 'program.body>iife!>iife.args(#window)'
+
+	#TODO: other patterns, IIFE module pattern ...
+	
 ## var-decs (VariableDeclaration)
 
 Too many variables assigned in one single var a=0,b=1,c-2,d=3,e=4,f=5; 
