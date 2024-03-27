@@ -13,6 +13,11 @@ Any reviews, and more samples are welcomed (Pull Requests please).
 
 Many codes reference dojo APIs as samples, but try to be framework agnostic.
 
+# Original documentation for grasp tools
+
+start here for basic syntax and samples:
+http://www.graspjs.com/docs/
+
 # Forked version of grasp
 
 We are maintaining our own [forked version of grasp](https://github.com/gratex/grasp),
@@ -434,7 +439,9 @@ or something not mentioned yet ?
 	
 	grasp '(func-dec,func-exp,arrow)! (func-dec,func-exp,arrow)'
 
-## func-exp (FunctionExpression)
+## func-exp (FunctionExpression), 
+
+<https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/function>
 
 	# event handlers declared on dojo widget 
 	grasp "call[callee=#declare].args:nth(1)>prop[key=#/^h[A-Z]/][value=func-exp]"  
@@ -442,6 +449,12 @@ or something not mentioned yet ?
 	# one liner event handlers declared on dojo widget (do we really need them)
 	grasp  '(call[callee=#declare].args:nth(1)>prop[key=#/^h[A-Z]/]>func-exp)!.body>*:first-child:last-child'
 
+### Immediately Invoked Function Expression 
+see [IIFE](https://developer.mozilla.org/en-US/docs/Glossary/IIFE), and Self-Executing Anonymous Function design patterns.
+
+	grasp -s "call[callee=func-exp]" . -r
+
+	#TODO: other patterns, IIFE module pattern ...
 
 ## var-decs (VariableDeclaration)
 
@@ -784,6 +797,10 @@ Changing property syntax (Literal vs Identifier):
 
 	# dojo, see deferred antipattern
 	grasp -e "new Deferred()"
+
+
+	# arguments to MS proprietary new ActiveXObject
+	grasp -s -o 'new[callee=(#ActiveXObject)].arguments'
 
 ## call (CallExpression)
 
@@ -1133,35 +1150,6 @@ Extracting regexps from code, useful for review, DRY, safety, correctness
 	grasp '*!>new[callee=#RegExp].args:first(String)'
 	
 
-##  --parser   
-
-default parser config is:
-
-	# (acorn, {locations: true, ecmaVersion: 6, sourceType: 'module', allowHashBang: true})
-
-You may need to switch some of the settings, see next chapters.
-
-### running with 'other' acorn
-
-'Our' grasp comes with outdated acorn, and new one comes with flow parser.
-To use updated version of acorn (with ES2016 support), 
-specify path relative to grasp:
-
-	grasp -e 'isFinite(__)' --parser='(../../acorn/dist/acorn.js,{locations: true, ecmaVersion: 9, sourceType: 'module', allowHashBang: true})' -r ../node/lib
-
-
-### --parser sourceType
-
-If you get error like this:
-
-	Error: Could not parse JavaScript from 'mvc\Output.js'. 'with' in strict mode 
-
-Try:
-
-	grasp -W 'program.body > call[callee=(#define,#require)]'  -r \
-		--parser '(acorn, {locations: true, ecmaVersion: 6, sourceType: 'script', allowHashBang: true})'
-
-
 
 ## Changing Syntax of Properties
 
@@ -1434,5 +1422,42 @@ prefix non await calls of f2 with await
 	 grasp '(func-dec,func-exp,arrow)[async=true] *>call[callee=(#f2, member[prop=#f2])]' ./test/data/await.js -R 'await {{}}'
 
 combine the two above as seqence and you have async refactor	
+
+# CLI and config related hints
+
+##  --parser   
+
+default parser config is:
+
+	# (acorn, {locations: true, ecmaVersion: 6, sourceType: 'module', allowHashBang: true})
+
+You may need to switch some of the settings, see next chapters.
+
+### running with 'other' acorn
+
+'Our' grasp comes with outdated acorn, and new one comes with flow parser.
+To use updated version of acorn (with ES2016 support), 
+specify path relative to grasp:
+
+	grasp -e 'isFinite(__)' --parser='(../../acorn/dist/acorn.js,{locations: true, ecmaVersion: 9, sourceType: 'module', allowHashBang: true})' -r ../node/lib
+
+
+### --parser sourceType
+
+If you get error like this:
+
+	Error: Could not parse JavaScript from 'mvc\Output.js'. 'with' in strict mode 
+
+Try:
+
+	grasp -W 'program.body > call[callee=(#define,#require)]'  -r \
+		--parser '(acorn, {locations: true, ecmaVersion: 6, sourceType: 'script', allowHashBang: true})'
+
+
+## only filenames
+sometimes you only want filenames printed and parseable output (no colors etc.)
+
+	# file containing 'new Worker()'
+	grasp --files-with-matches --no-color 'new[callee=(#Worker)]' -r .
 
 
